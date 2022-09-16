@@ -1,0 +1,33 @@
+{
+  "name": "todaycommandupdater",
+  "version": "1.0.0",
+  "description": "Updates \"!today\" command using Minecraft Speedrunning stats sheet for Twitch chatbots",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/draconix6/TodayCommandUpdater.git"
+  },
+  "author": "draconix",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/draconix6/TodayCommandUpdater/issues"
+  },
+  "homepage": "https://github.com/draconix6/TodayCommandUpdater#readme",
+  "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
+    "@twurple/api": "^5.2.3",
+    "@twurple/auth": "^5.2.3",
+    "@twurple/eventsub": "^5.2.3",
+    "@twurple/eventsub-ngrok": "^5.2.3",
+    "axios": "^0.27.2",
+    "express": "^4.18.1",
+    "fs": "^0.0.1-security",
+    "fs.promises": "^0.1.2",
+    "googleapis": "^105.0.0",
+    "path": "^0.12.7",
+    "process": "^0.11.10"
+  }
+}
