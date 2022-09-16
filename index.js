@@ -39,7 +39,7 @@ function startHandlingEvents(userInfo) {
             // column L = indexes of multiple 11 in array
             // could find a more efficient way to cycle through values later
             blinds = "No blinds today";
-            for (i = 12; i < response.data.values.length; i++) {
+            for (i = 1; i < response.data.values.length; i++) {
                 if (response.data.values[i][11]) {
                     if (blinds == "No blinds today") {
                         blinds = "Nether exits today: ";
@@ -51,9 +51,10 @@ function startHandlingEvents(userInfo) {
                 }
                 if (response.data.values[i][0] == userInfo.dateToTrackFrom) {
                     console.log("Successfully processed request for " + userInfo.twitchUser + "'s blinds: " + blinds);
-                    res.end(blinds) // return blinds;
+                    break;
                 }
             }
+            res.end(blinds) // return blinds;
         })
         .catch((error) => console.error(error));
     });
