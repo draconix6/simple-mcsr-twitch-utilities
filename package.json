@@ -2,9 +2,10 @@
   "name": "todaycommandupdater",
   "version": "1.0.0",
   "description": "Updates \"!today\" command using Minecraft Speedrunning stats sheet for Twitch chatbots",
+  "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",

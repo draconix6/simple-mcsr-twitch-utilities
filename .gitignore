@@ -1,3 +1,7 @@
 node_modules
 package-lock.json
 token.json
+firebase.json
+.firebase/hosting.cHVibGlj.cache
+.firebaserc
+firebase-debug.log

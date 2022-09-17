@@ -58,8 +58,8 @@ function startHandlingEvents(userInfo) {
         })
         .catch((error) => console.error(error));
     });
-    listener.subscribeToStreamOfflineEvents(userInfo.twitchChannelId, h => offlineTimer(h)).catch((error) => console.log(error));
-    listener.subscribeToStreamOnlineEvents(userInfo.twitchChannelId, j => checkIfReconnect(j)).catch((error) => console.log(error));
+    listener.subscribeToStreamOfflineEvents(userInfo.twitchChannelId, h => offlineTimer(userInfo)).catch((error) => console.log(error));
+    listener.subscribeToStreamOnlineEvents(userInfo.twitchChannelId, j => checkIfReconnect(userInfo)).catch((error) => console.log(error));
     console.log(`Now handling runs for user ${userInfo.twitchUser}`);
 }
 
@@ -79,21 +79,19 @@ function getCommandId(token) {
 
 // 10 minute timer which will set channel state to offline if streamer spends 10 minutes offline, used to account for disconnection issues
 function offlineTimer(user) {
-    userIndex = getUserIndex(user.broadcasterId);
-    ids.users[userIndex].offlineTimer = true;
+    user.offlineTimer = true;
     setTimeout(() => {
-        if (ids.users[userIndex].channelOnline && ids.users[userIndex].offlineTimer) {
-            ids.users[userIndex].channelOnline = false;
-            ids.users[userIndex].offlineTimer = false;
+        if (user.channelOnline && user.offlineTimer) {
+            user.channelOnline = false;
+            user.offlineTimer = false;
         }
     }, 10 * 60 * 1000);
 }
 
 // runs getFirstCellDate if user was truly offline (ie. didn't reconnect when offlineTimer was true) when stream started, to avoid command resetting if accidental disconnect
 function checkIfReconnect(user) {
-    userIndex = getUserIndex(user.broadcasterId);
-    if (!ids.users[userIndex].offlineTimer) {
-        ids.users[userIndex].dateToTrackFrom = getFirstCellDate(ids.users[userIndex].googleSheetId);
+    if (!user.offlineTimer) {
+        user.dateToTrackFrom = getFirstCellDate(user.googleSheetId);
     }
 }
 
@@ -140,8 +138,8 @@ async function getTodayRuns(userInfo) {
 }
 
 app.use(express.static('public'));
-  
-app.listen(3000, () => {
+const port = parseInt(process.env.PORT) || 3000;
+app.listen(port, () => {
     console.log("Server is Running")
 });
 
