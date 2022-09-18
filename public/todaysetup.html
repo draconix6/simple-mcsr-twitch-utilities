@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>today command updater™</title>
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/> -->
+        <link rel="stylesheet" href="./style.css"/>
+    </head>
+    <body>
+        <nav>
+            <a href="/">home</a>
+            <a href="wallsetup">wall scene maker</a>
+            <a href="raidsetup">raid command updater</a>
+            <a href="todaysetup">today command updater</a>
+        </nav>
+        <main>
+            <header>
+                <h1>today command updater™</h1>
+                <p>After submit is clicked, the website will give you a URL.</p>
+                <p>Edit your !today command (or add a new one) to read from the given URL.</p>
+                <p>Nightbot: "!editcom !today $(urlfetch INSERT URL HERE)"</p>
+                <p>StreamElements: "!commands edit !today $(urlfetch INSERT URL HERE)"</p>
+                <p>Fossabot: "!editcmd !today $(customapi INSERT URL HERE)"</p>
+            </header>
+            <content>
+                <form action="/todayUrl" method="GET">
+                    <div>
+                        <p>
+                            Twitch username <input type="text" name="user" placeholder="draconix6" required="true"></input>
+                            Google Sheets link <input type="text" name="sheet" placeholder="https://docs.google.com/spreadsheets/d/..." required="true"></input>
+                            <!-- checkbox input for nightbot command here -->
+                        </p>
+                        <input type="submit" value="Submit"></input>
+                    </div>
+                </form>
+            </content>
+        </main>
+        <footer>
+            made by draconix // <a href="https://github.com/draconix6/simple-mcsr-twitch-utilities">github</a>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>wall scene maker™</title>
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/> -->
+        <link rel="stylesheet" href="./style.css"/>
+    </head>
+    <body>
+        <nav>
+            <a href="/">home</a>
+            <a href="wallsetup">wall scene maker</a>
+            <a href="raidsetup">raid command updater</a>
+            <a href="todaysetup">today command updater</a>
+        </nav>
+        <main>
+            <header>
+                <h1>wall scene maker™</h1>
+                <p>When submit is clicked, right click the page and save as.</p>
+                <p>The downloaded file should be dragged into OBS > Scene Collection > Import.</p>
+                <p>Then a new scene collection will be available.</p>
+                <p>I recommend using the <a href="https://obsproject.com/forum/resources/source-copy.1261/">Source Copy</a> plugin to transfer your existing overlay sources</p>
+                <!-- <p>OR, use OBS > Scene Collection > Export, upload below,</p>
+                <p>and the generated collection will use your "Overlay" scene.</p> -->
+            </header>
+            <content>
+                <form action="/wallDownload" method="GET">
+                    <div>
+                        <p>
+                            Rows <input type="number" name="rows" min="1" max="9" value="2" required="true"></input>
+                        </p>
+                        <p>
+                            Columns <input type="number" name="cols" min="1" max="9" value="3" required="true"></input>
+                        </p>
+                    </div>
+                    <div>
+                        <p>
+                            Do you use fullscreen? <input type="checkbox" name="fullscreen" checked="checked"></input>
+                        </p>
+                    </div>
+                    <div>
+                        <p>
+                            Base resolution:
+                        </p>
+                        <p>
+                            <input type="radio" name="screenSize" value="1080" checked="checked"></input>1920x1080
+                            <input type="radio" name="screenSize" value="1440"></input>2560x1440
+                            <input type="radio" name="screenSize" value="2160"></input>3840x2160
+                            <input type="radio" name="screenSize" value="custom" id="custom"></input>Custom
+                            <input type="number" name="screenWidth" min="1280" max="10000" placeholder="Width"></input>
+                            <input type="number" name="screenHeight" min="720" max="10000" placeholder="Height"></input>
+                        </p>
+                    </div>
+                    <div style="background-color:rgb(22, 22, 22); padding: 5px; border-radius: 5px; margin-bottom: 5px;">
+                        <p>
+                            Extra/advanced options:
+                        </p>
+                        <div>
+                            <p>
+                                Scene switching method:
+                            </p>
+                            <p><input type="radio" name="switchMethod" value="N" checked="checked"></input>N (Numpad 1-9, default)</p>
+                            <p><input type="radio" name="switchMethod" value="F"></input>F (F13-F24)</p>
+                            <p><input type="radio" name="switchMethod" value="ARR" id="arrayButton"></input>ARR (advanced array)
+                            [ <input type="text" name="switchArray" id="arrayBox" placeholder="WIP - set hotkeys manually" disabled="true"></input> ]</p> <!-- '"Key1","Key2",etc.' -->
+                            <p><input type="radio" name="switchMethod" value="ASS" id="assButton"></input>ASS (Advanced Scene Switcher)</p>
+                            <p>Path to instance.txt (for ASS): <input type="text" name="assPath" id="assBox" placeholder="D:\Macro\data\instance.txt"></input></p>
+                            <p><input type="radio" name="switchMethod" value="rawalle"></input>Rawalle OBS Controller <a href="https://github.com/joe-ldp/Rawalle/releases/tag/v1.4.0-beta1">(setup)</a>
+                        </div>
+                        <div>
+                            <p>
+                                Lock indicators <input type="checkbox" name="locks" id="locks"></input>
+                                <input type="radio" name="lockPos" value="tl" disabled="true" checked="checked"></input>Top left
+                                <input type="radio" name="lockPos" value="tr" disabled="true"></input>Top right
+                                <input type="radio" name="lockPos" value="bl" disabled="true"></input>Bottom left
+                                <input type="radio" name="lockPos" value="br" disabled="true"></input>Bottom right
+                            </p>
+                            <p>
+                                <input type="number" name="lockWidth" min="20" max="1000" placeholder="Width"></input>
+                                <input type="number" name="lockHeight" min="20" max="1000" placeholder="Height"></input>
+                            </p>
+                            <p>
+                                MultiMC path (for specnr macro locks): <input type="text" name="multiPath" placeholder="D:/Documents/MultiMC"></input>
+                            </p>
+                            <p>
+                                Instance name format (for specnr macro locks): <input type="text" name="instFormat" placeholder="Instance *"></input>
+                            </p>
+                        </div>
+                    </div>
+                    <p>
+                        <input type="submit" value="Submit"></input>
+                    </p>
+                </form>
+            </content>
+        </main>
+        <footer>
+            made by draconix // <a href="https://github.com/draconix6/simple-mcsr-twitch-utilities">github</a>
+        </footer>
+
+        <script>
+            document.getElementById("locks").onclick = function() {
+                lockChoices = document.getElementsByName("lockPos");
+                for (var i = 0; i < lockChoices.length; i++) {
+                    if (lockChoices[i].disabled) {
+                        lockChoices[i].disabled = false;
+                    }
+                    else {
+                        lockChoices[i].disabled = true;
+                    }
+                }
+            }
+            // arrayButton = document.getElementById("arrayButton");
+            // arrayButton.onclick = function() {
+            //     arrayBox = document.getElementById("arrayBox");
+            //     if (arrayButton.checked == "checked") {
+            //         arrayBox.disabled = false;
+            //     }
+            //     else {
+            //         arrayBox.disabled = true;
+            //     }
+            // }
+        </script>
+    </body>
+</html>

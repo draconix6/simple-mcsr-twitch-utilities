@@ -1,0 +1,30 @@
+{
+    "balance": 0.5,
+    "deinterlace_field_order": 0,
+    "deinterlace_mode": 0,
+    "enabled": true,
+    "flags": 0,
+    "hotkeys": {
+        "hotkey_start": [],
+        "hotkey_stop": []
+    },
+    "id": "game_capture",
+    "mixers": 0,
+    "monitoring_type": 0,
+    "muted": false,
+    "name": "main mc 9",
+    "prev_ver": 469762049,
+    "private_settings": {},
+    "push-to-mute": false,
+    "push-to-mute-delay": 0,
+    "push-to-talk": false,
+    "push-to-talk-delay": 0,
+    "settings": {
+        "capture_mode": "window",
+        "priority": 0,
+        "window": "Minecraft* - Instance 9:GLFW30:javaw.exe"
+    },
+    "sync": 0,
+    "versioned_id": "game_capture",
+    "volume": 1
+}

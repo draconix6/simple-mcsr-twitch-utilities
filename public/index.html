@@ -2,54 +2,43 @@
 <html>
     <head>
         <title>today command updater™</title>
-        <style>
-            html {
-                font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                display:flex;
-                justify-content:center;
-                align-items:center;
-            }
-            h1 {
-                text-align:center;
-            }
-            p {
-                margin:0px 0px 4px 0px;
-            }
-            a {
-                text-decoration: none;
-            }
-            div {
-                display:flex;
-                flex-direction:column;
-            }
-            form {
-                padding:10px;
-                display:flex;
-                justify-content: center;
-            }
-            footer {
-                margin:10px;
-                text-align:center;
-            }
-        </style>
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/> -->
+        <link rel="stylesheet" href="./style.css"/>
     </head>
     <body>
-        <header>
-            <h1>today command updater™</h1>
-            <p>When submit is clicked, edit your !today command to read from the given URL.</p>
-            <p>For example, with Nightbot, type "!editcom !today $(urlfetch INSERT URL HERE)" in chat.</p>
-        </header>
-        <content>
-            <form action="/giveUrl" method="GET">
-                <div>
-                    <p>
-                        Twitch username <input type="text" name="user" placeholder="draconix6" required="true"></input>
-                        Google Sheets link <input type="text" name="sheet" placeholder="https://docs.google.com/spreadsheets/d/..." required="true"></input>
-                        <!-- checkbox input for nightbot command here -->
-                    </p>
-                    <input type="submit" value="Submit"></input>
-                </div>
-            </form>
-        </content>
+        <nav>
+            <a href="/">home</a>
+            <a href="wallsetup">wall scene maker</a>
+            <a href="raidsetup">raid command updater</a>
+            <a href="todaysetup">today command updater</a>
+        </nav>
+        <main>
+            <header>
+                <h1>yo</h1>
+            </header>
+            <content style="text-align:center;">
+                <p>
+                    <a href="wallsetup">wall scene maker</a> - generates OBS "wall" scenes to be used for multi-instance minecraft speedruns
+                </p>
+                <p>
+                    <a href="raidsetup">raid command updater</a> - track raids while streaming on twitch, to be used with a chatbot (e.g. Nightbot) so viewers can see all raids for any given stream
+                </p>
+                <p>
+                    <a href="todaysetup">today command updater</a> - track nether exits in minecraft speedrunning given a stat tracking sheet, to be used with a chatbot so viewers can see all blinds for any given stream
+                </p>
+                <!-- <p>
+                    <a href="https://twitch.tv/draconix6">twitch</a>
+                </p>
+                <p>
+                    <a href="https://www.youtube.com/channel/UCE27ZuTMwmKBVNH9rkKEDqA">youtube</a>
+                </p>
+                <p>
+                    <a href="https://twitter.com/draconix_">twitter</a>
+                </p> -->
+            </content>
+        </main>
+        <footer>
+            made by draconix // <a href="https://github.com/draconix6/simple-mcsr-twitch-utilities">github</a>
+        </footer>
     </body>
 </html>

@@ -1,0 +1,11 @@
+{
+    "file": "D:/Documents/speedrun/mc/MultiResetWallpre5/data/instance.txt",
+    "onlyMatchIfChanged": false,
+    "remote": false,
+    "target": "Instance 1",
+    "targetType": 0,
+    "text": "1",
+    "transition": "Current Transition",
+    "useRegex": false,
+    "useTime": false
+  }

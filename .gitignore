@@ -5,3 +5,4 @@ firebase.json
 .firebase/hosting.cHVibGlj.cache
 .firebaserc
 firebase-debug.log
+.gcloudignore

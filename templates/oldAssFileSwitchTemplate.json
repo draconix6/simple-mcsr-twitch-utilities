@@ -1,0 +1,40 @@
+{
+    "actions":[
+        {
+            "blockUntilTransitionDone":true,
+            "collapsed":false,"displayUnit":0,
+            "id":"scene_switch",
+            "scene":"The Wall",
+            "sceneType":0,
+            "seconds":0.0,
+            "transitionType":1
+        }
+    ],
+    "conditions":[
+        {
+            "collapsed":false,
+            "durationModifier":
+            {
+                "displayUnit":0,
+                "seconds":0.0,
+                "time_constraint":0
+            },
+            "file":"D:/Documents/speedrun/mc/MultiResetWallpre6/data/instance.txt",
+            "fileType":0,
+            "id":"file",
+            "logic":0,
+            "onlyMatchIfChanged":false,
+            "text":"0",
+            "useRegex":false,
+            "useTime":false
+        }
+    ],
+    "name":"Switch to Wall Scene",
+    "onChange":false,
+    "parallel":false,
+    "pause":false,
+    "pauseHotkey":[],
+    "registerHotkeys":true,
+    "togglePauseHotkey":[],
+    "unpauseHotkey":[]
+}

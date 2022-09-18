@@ -1,0 +1,35 @@
+{
+            "align": 5,
+            "bounds": {
+              "x": 640,
+              "y": 360
+            },
+            "bounds_align": 0,
+            "bounds_type": 1,
+            "crop_bottom": 0,
+            "crop_left": 0,
+            "crop_right": 0,
+            "crop_top": 0,
+            "group_item_backup": false,
+            "hide_transition": {
+              "duration": 0
+            },
+            "id": 2,
+            "locked": true,
+            "name": "mc 1",
+            "pos": {
+              "x": 0,
+              "y": 0
+            },
+            "private_settings": {},
+            "rot": 0,
+            "scale": {
+              "x": 1,
+              "y": 1
+            },
+            "scale_filter": "disable",
+            "show_transition": {
+              "duration": 0
+            },
+            "visible": true
+          }
