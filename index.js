@@ -81,11 +81,12 @@ function offlineTimer(user) {
 
 // runs getFirstCellDate if user was truly offline (ie. didn't reconnect when offlineTimer was true) when stream started, to avoid command resetting if accidental disconnect
 function checkIfReconnect(user) {
+    var userIndex = getUserIndex(user.twitchUser);
     console.log("User " + user.twitchUser + " has started streaming");
-    ids.users[getUserIndex(user.twitchUser)].channelOnline = true;
-    if (!user.offlineTimer) {
+    ids.users[userIndex].channelOnline = true;
+    if (!user.offlineTimer && user.googleSheetId != "") {
         getFirstCellDate(user.googleSheetId).then(async (response) => {
-            user.dateToTrackFrom = response;
+            ids.users[userIndex].dateToTrackFrom = response;
         });
     }
 }
@@ -149,98 +150,113 @@ app.listen(port, () => {
 
 // today command updater
 app.get("/todayUrl", async (req, res) => {
-    var sheetId = req.query.sheet.split("/");
-    for (i = 0; i < sheetId.length; i++) {
-        if (sheetId[i] == "d") {
-            sheetId = sheetId[i + 1];
-            break;
+    var idToAdd = await getStreamerId(req.query.user);
+    if (idToAdd) {
+        var sheetId = req.query.sheet.split("/");
+        for (i = 0; i < sheetId.length; i++) {
+            if (sheetId[i] == "d") {
+                sheetId = sheetId[i + 1];
+                break;
+            }
         }
+        getFirstCellDate(sheetId).then(async (response) => {
+            var userIndex = getUserIndex(req.query.user);
+            if (userIndex == -1) {
+                userInfo = {
+                    twitchUser: `${req.query.user}`,
+                    twitchChannelId: `${idToAdd}`,
+                    channelOnline: true,
+                    offlineTimer: false,
+                    raids: "",
+                    googleSheetId: `${sheetId}`,
+                    dateToTrackFrom: `${response}`
+                };
+                startHandlingEvents(userInfo);
+                ids.users.push(userInfo);
+                console.log("Pushed new user " + req.query.user + " for today command.");
+                // below two lines can be outside of the if statement if a workaround for editing anyone's command is found - signing into twitch?
+                fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
+                res.end("https://today-command-updater.web.app/today?user=" + req.query.user);
+            }
+            else {
+                res.end("User is already registered. Contact draconix#6540 if you would like to change your spreadsheet.\nhttps://today-command-updater.web.app/today?user=" + req.query.user);
+                // ids.users[userIndex].googleSheetId = sheetId;
+                // ids.users[userIndex].dateToTrackFrom = response;
+                // console.log("Edited existing user " + req.query.user + " for today command.");
+            }
+        });
     }
-    getFirstCellDate(sheetId).then(async (response) => {
-        var userIndex = getUserIndex(req.query.user);
+    else {
+        res.end("User not found");
+    }
+});
+
+app.get(`/today`, async (req, res) => {
+    var userInfo = await ids.users[getUserIndex(req.query.user)];
+    if (userInfo) {
+        axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${userInfo.googleSheetId}/values/'Raw Data'!A:L?key=${ids.googleApiKey}`)
+        .then((response) => {
+            // column L = indexes of multiple 11 in array
+            // could find a more efficient way to cycle through values later
+            blinds = "No blinds today";
+            for (i = 1; i < response.data.values.length; i++) {
+                if (response.data.values[i][11]) {
+                    if (blinds == "No blinds today") {
+                        blinds = "Nether exits today: ";
+                    }
+                    else {
+                        blinds = blinds + ", ";
+                    }
+                    blinds = blinds + response.data.values[i][11];
+                }
+                if (response.data.values[i][0] == userInfo.dateToTrackFrom) {
+                    console.log("Successfully processed request for " + userInfo.twitchUser + "'s blinds: " + blinds);
+                    break;
+                }
+            }
+            res.end(blinds) // return blinds;
+        })
+        .catch((error) => console.error(error));
+    }
+});
+
+// raid command updater
+app.get("/raidUrl", async (req, res) => {
+    var idToAdd = await getStreamerId(req.query.user);
+    if (idToAdd) {
+        userIndex = getUserIndex(req.query.user);
         if (userIndex == -1) {
-            var idToAdd = await getStreamerId(req.query.user);
             userInfo = {
                 twitchUser: `${req.query.user}`,
                 twitchChannelId: `${idToAdd}`,
                 channelOnline: true,
                 offlineTimer: false,
-                raids: "",
-                googleSheetId: `${sheetId}`,
-                dateToTrackFrom: `${response}`
+                raids: "-",
+                googleSheetId: "",
+                dateToTrackFrom: ""
             };
-            startHandlingEvents(userInfo);
             ids.users.push(userInfo);
-            console.log("Pushed new user " + req.query.user + " for today command.");
-            // below two lines can be outside of the if statement if a workaround for editing anyone's command is found - signing into twitch?
-            fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
-            res.end("https://today-command-updater.web.app/today?user=" + req.query.user);
+            startHandlingEvents(userInfo);
+            console.log("Pushed new user " + req.query.user + " for raid command.");
         }
         else {
-            res.end("User is already registered. Contact draconix#6540 if you would like to change your spreadsheet.\nhttps://today-command-updater.web.app/today?user=" + req.query.user);
-            // ids.users[userIndex].googleSheetId = sheetId;
-            // ids.users[userIndex].dateToTrackFrom = response;
-            // console.log("Edited existing user " + req.query.user + " for today command.");
+            ids.users[userIndex].raid = "-";
+            console.log("Edited existing user " + req.query.user + " for today command.");
         }
-    });
-});
-
-app.get(`/today`, async (req, res) => {
-    var userInfo = await ids.users[getUserIndex(req.query.user)];
-    axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${userInfo.googleSheetId}/values/'Raw Data'!A:L?key=${ids.googleApiKey}`)
-    .then((response) => {
-        // column L = indexes of multiple 11 in array
-        // could find a more efficient way to cycle through values later
-        blinds = "No blinds today";
-        for (i = 1; i < response.data.values.length; i++) {
-            if (response.data.values[i][11]) {
-                if (blinds == "No blinds today") {
-                    blinds = "Nether exits today: ";
-                }
-                else {
-                    blinds = blinds + ", ";
-                }
-                blinds = blinds + response.data.values[i][11];
-            }
-            if (response.data.values[i][0] == userInfo.dateToTrackFrom) {
-                console.log("Successfully processed request for " + userInfo.twitchUser + "'s blinds: " + blinds);
-                break;
-            }
-        }
-        res.end(blinds) // return blinds;
-    })
-    .catch((error) => console.error(error));
-});
-
-// raid command updater
-app.get("/raidUrl", async (req, res) => {
-    userIndex = getUserIndex(req.query.user);
-    if (userIndex == -1) {
-        userInfo = {
-            twitchUser: `${req.query.user}`,
-            twitchChannelId: `${idToAdd}`,
-            channelOnline: true,
-            offlineTimer: false,
-            raids: "-",
-            googleSheetId: "",
-            dateToTrackFrom: ""
-        };
-        ids.users.push(userInfo);
-        startHandlingEvents(userInfo);
-        console.log("Pushed new user " + req.query.user + " for raid command.");
+        fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
+        res.end("https://today-command-updater.web.app/raid?user=" + req.query.user);
     }
     else {
-        ids.users[userIndex].raid = "-";
-        console.log("Edited existing user " + req.query.user + " for today command.");
+        res.end("User not found");
     }
-    fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
-    res.end("https://today-command-updater.web.app/raid?user=" + req.query.user);
 });
 
 app.get(`/raid`, async (req, res) => {
-    raids = ids.users[getUserIndex(req.query.user)].raids;
-    res.end(raids);
-    console.log("Successfully processed request for " + req.query.user + "'s raids: " + raids);
+    var raids = ids.users[getUserIndex(req.query.user)].raids;
+    if (raids) {
+        res.end(raids);
+        console.log("Successfully processed request for " + req.query.user + "'s raids: " + raids);
+    }
 });
 
 // wall scene maker
