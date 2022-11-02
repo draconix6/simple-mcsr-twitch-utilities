@@ -7,6 +7,10 @@
   "hotkeys": {
     "OBSBasic.SelectScene": [
       {
+        "key": "OBS_KEY_F12",
+        "shift":true
+      },
+      {
         "key": "OBS_KEY_F12"
       }
     ]

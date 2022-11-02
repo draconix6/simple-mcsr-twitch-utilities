@@ -7,6 +7,10 @@
       "hotkeys": {
         "OBSBasic.SelectScene": [
           {
+            "key": "",
+            "shift":true
+          },
+          {
             "key": ""
           }
         ]

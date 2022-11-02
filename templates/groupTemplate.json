@@ -1,0 +1,29 @@
+{
+    "balance": 0.5,
+    "deinterlace_field_order": 0,
+    "deinterlace_mode": 0,
+    "enabled": true,
+    "flags": 0,
+    "hotkeys": {},
+    "id": "group",
+    "mixers": 0,
+    "monitoring_type": 0,
+    "muted": false,
+    "name": "mc group",
+    "prev_ver": 469762051,
+    "private_settings": {},
+    "push-to-mute": false,
+    "push-to-mute-delay": 0,
+    "push-to-talk": false,
+    "push-to-talk-delay": 0,
+    "settings": {
+      "custom_size": true,
+      "cx": 1920,
+      "cy": 1080,
+      "id_counter": 0,
+      "items": []
+    },
+    "sync": 0,
+    "versioned_id": "group",
+    "volume": 1
+  }

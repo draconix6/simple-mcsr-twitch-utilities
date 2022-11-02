@@ -176,10 +176,15 @@ app.get("/todayUrl", async (req, res) => {
                 console.log("Pushed new user " + req.query.user + " for today command.");
                 // below two lines can be outside of the if statement if a workaround for editing anyone's command is found - signing into twitch?
                 fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
-                res.end("https://today-command-updater.web.app/today?user=" + req.query.user);
+                // send !editcom templates for common chatbots
+                res.end(`<p>Nightbot: !editcom !today $(urlfetch https://today-command-updater.web.app/today?user=${req.query.user})</p>
+                <p>StreamElements: !commands edit !today $(urlfetch https://today-command-updater.web.app/today?user=${req.query.user})</p>
+                <p>Fossabot: !editcmd !today $(customapi https://today-command-updater.web.app/today?user=${req.query.user})</p>
+                <p>If you use a different chatbot, refer to the "variables" documentation of your chatbot to read from this URL: https://today-command-updater.web.app/today?user=${req.query.user}</p>`);
             }
             else {
-                res.end("User is already registered. Contact draconix#6540 if you would like to change your spreadsheet.\nhttps://today-command-updater.web.app/today?user=" + req.query.user);
+                res.end(`<p>User is already registered. Contact draconix#6540 if you would like to change your spreadsheet.</p>
+                <p>https://today-command-updater.web.app/today?user=${req.query.user}</p>`);
                 // ids.users[userIndex].googleSheetId = sheetId;
                 // ids.users[userIndex].dateToTrackFrom = response;
                 // console.log("Edited existing user " + req.query.user + " for today command.");
@@ -194,11 +199,15 @@ app.get("/todayUrl", async (req, res) => {
 app.get(`/today`, async (req, res) => {
     var userInfo = await ids.users[getUserIndex(req.query.user)];
     if (userInfo) {
-        axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${userInfo.googleSheetId}/values/'Raw Data'!A:L?key=${ids.googleApiKey}`)
+        axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${userInfo.googleSheetId}/values/'Raw Data'!A:N?key=${ids.googleApiKey}`)
         .then((response) => {
-            // column L = indexes of multiple 11 in array
+            // column L = indexes of multiple 11 in array - nether exits
+            // column M = indexes of multiple 12 in array - stronghold enters
+            // column N = indexes of multiple 13 in array - end enters
             // could find a more efficient way to cycle through values later
-            blinds = "No blinds today";
+            var blinds = "No blinds today";
+            var strongholds = "";
+            var ends = "";
             for (i = 1; i < response.data.values.length; i++) {
                 if (response.data.values[i][11]) {
                     if (blinds == "No blinds today") {
@@ -209,14 +218,36 @@ app.get(`/today`, async (req, res) => {
                     }
                     blinds = blinds + response.data.values[i][11];
                 }
+                if (response.data.values[i][12]) {
+                    if (strongholds == "") {
+                        strongholds = " Stronghold enters today: ";
+                    }
+                    else {
+                        strongholds = strongholds + ", ";
+                    }
+                    strongholds = strongholds + response.data.values[i][12];
+                }
+                if (response.data.values[i][13]) {
+                    if (ends == "") {
+                        ends = " End enters today: ";
+                    }
+                    else {
+                        ends = ends + ", ";
+                    }
+                    ends = ends + response.data.values[i][13];
+                }
                 if (response.data.values[i][0] == userInfo.dateToTrackFrom) {
-                    console.log("Successfully processed request for " + userInfo.twitchUser + "'s blinds: " + blinds);
+                    console.log("Successfully processed request for " + userInfo.twitchUser + "'s pace: " + blinds + strongholds + ends);
                     break;
                 }
             }
-            res.end(blinds) // return blinds;
+            // res.end(blinds + strongholds + ends) // return blinds;
+            res.end(`Automatic today command is currently not working :\\`);
         })
         .catch((error) => console.error(error));
+    }
+    else {
+        res.end("User not found");
     }
 });
 
@@ -240,11 +271,15 @@ app.get("/raidUrl", async (req, res) => {
             console.log("Pushed new user " + req.query.user + " for raid command.");
         }
         else {
-            ids.users[userIndex].raid = "-";
-            console.log("Edited existing user " + req.query.user + " for today command.");
+            ids.users[userIndex].raids = "-";
+            console.log("Edited existing user " + req.query.user + " for raid command.");
         }
         fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
-        res.end("https://today-command-updater.web.app/raid?user=" + req.query.user);
+        // send !editcom templates for common chatbots
+        res.end(`<p>Nightbot: !editcom !today $(urlfetch https://today-command-updater.web.app/raid?user=${req.query.user})</p>
+        <p>StreamElements: !commands edit !today $(urlfetch https://today-command-updater.web.app/raid?user=${req.query.user})</p>
+        <p>Fossabot: !editcmd !today $(customapi https://today-command-updater.web.app/raid?user=${req.query.user})</p>
+        <p>If you use a different chatbot, refer to the "variables" documentation of your chatbot to read from this URL: https://today-command-updater.web.app/raid?user=${req.query.user}</p>`);
     }
     else {
         res.end("User not found");
@@ -252,11 +287,50 @@ app.get("/raidUrl", async (req, res) => {
 });
 
 app.get(`/raid`, async (req, res) => {
-    var raids = ids.users[getUserIndex(req.query.user)].raids;
-    if (raids) {
-        res.end(raids);
-        console.log("Successfully processed request for " + req.query.user + "'s raids: " + raids);
+    var userInfo = await ids.users[getUserIndex(req.query.user)];
+    if (userInfo) {
+        var raids = userInfo.raids;
+        if (raids) {
+            // res.end(raids);
+            res.end(`Automatic raid command is currently not working :\\`);
+            console.log("Successfully processed request for " + req.query.user + "'s raids: " + raids);
+        }
+        else {
+            res.end("User not registered for raids");
+        }
     }
+    else {
+        res.end("User not found");
+    }
+});
+
+// manually reset commands, because google is not kind and won't do it itself
+app.get(`/reset`, async (req, res) => {
+    var msg = "";
+    var userIndex = await getUserIndex(req.query.user);
+    if (userIndex != -1) {
+        if (ids.users[userIndex].googleSheetId != "") {
+            await getFirstCellDate(ids.users[userIndex].googleSheetId)
+            .then(async (response) => {
+                ids.users[userIndex].dateToTrackFrom = response;
+                msg = msg + req.query.user + " date updated to " + response;
+            })
+            .catch((err) => res.end(err));
+        }
+        if (ids.users[userIndex].raids != "") {
+            ids.users[userIndex].raids = "-";
+            if (msg != "") {
+                msg = msg + "\n";
+            }
+            msg = msg + req.query.user + " raids reset";
+        }
+        fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
+    }
+    else {
+        msg = "User not found";
+    }
+    console.log("Reset commands for " + req.query.user);
+    res.end(msg);
 });
 
 // wall scene maker
@@ -327,12 +401,14 @@ class IScene extends Template
         super("./templates/instSceneTemplate.json");
         if (switchMethod == "F") {
             this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_F" + (instNum + 12);
+            this.template.hotkeys["OBSBasic.SelectScene"][1].key = "OBS_KEY_F" + (instNum + 12);
         }
         else if (switchMethod == "ARR") {
             // keyToSet = switchArray[instNum];
         }
         else if (switchMethod == "N") {
             this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_NUM" + instNum;
+            this.template.hotkeys["OBSBasic.SelectScene"][1].key = "OBS_KEY_NUM" + instNum;
         }
         this.template.name = "Instance " + instNum;
         if (fullscreen) {
@@ -350,20 +426,29 @@ class IScene extends Template
 
 class WSceneItem extends Template
 {
-    constructor(instNum) {
+    constructor(instNum, groupItem, fs) {
         super("./templates/wallSceneItemTemplate.json");
-        this.template.name = "mc " + instNum;
+        // if (fs) {
+        //     this.template.name = "main mc " + instNum;
+        // }
+        // else {
+            this.template.name = "mc " + instNum;
+        // }
         this.template.id = instNum
         this.template.bounds.x = wallItemWidth
         this.template.bounds.y = wallItemHeight;
         this.template.pos.x = wallItemWidth * ((instNum - 1) % cols);
         this.template.pos.y = wallItemHeight * Math.floor((instNum - 1) / cols);
+        if (groupItem)
+        {
+            this.template.group_item_backup = true;
+        }
     }
 }
 
 class WSceneLock extends Template
 {
-    constructor(instNum) {
+    constructor(instNum, groupItem) {
         super("./templates/wallSceneLockTemplate.json");
         this.template.name = "lock " + instNum;
         this.template.id = instCount + instNum
@@ -381,6 +466,47 @@ class WSceneLock extends Template
             this.template.pos.x += wallItemWidth - lockWidth;
             this.template.pos.y += wallItemHeight - lockHeight;
         }
+        if (groupItem)
+        {
+            this.template.group_item_backup = true;
+        }
+    }
+}
+
+class GroupSource extends Template
+{
+    constructor(lock) {
+        super("./templates/groupTemplate.json");
+        if (lock)
+        {
+            this.template.name = "lock group";
+        }
+        else
+        {
+            this.template.name = "mc group";
+        }
+        this.template.settings.cx = screenWidth;
+        this.template.settings.cy = screenHeight;
+    }
+}
+
+class WSceneGroup extends Template
+{
+    constructor(lock) {
+        super("./templates/wallSceneItemTemplate.json");
+        if (lock)
+        {
+            this.template.name = "lock group";
+            this.template.id = 2;
+        }
+        else
+        {
+            this.template.name = "mc group";
+            this.template.id = 1;
+        }
+        this.template.bounds.x = 0;
+        this.template.bounds.y = 0;
+        this.template.bounds_type = 0;
     }
 }
 
@@ -388,9 +514,9 @@ class WScene extends Template
 {
     constructor() {
         super("./templates/wallSceneTemplate.json");
-        if (switchMethod == "N" || switchMethod == "F") {
-            this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_F12";
-        }
+        // if (switchMethod == "N" || switchMethod == "F") {
+        //     this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_F12";
+        // }
     }
 }
 
@@ -401,6 +527,10 @@ class WallSceneCollection extends Template
         this.template.name = cols + "x" + rows + " wall";
         let wallScene = new WScene();
 
+        // needs to be within scope of the code below
+        let mcGroup = new GroupSource(false).template;
+        let lockGroup = new GroupSource(true).template;
+
         for (var i = 1; i <= instCount; i++)
         {
             this.template.scene_order.push({name:"Instance " + (i)});
@@ -410,13 +540,16 @@ class WallSceneCollection extends Template
             if (switchMethod == "ASS") {
                 this.template.modules["advanced-scene-switcher"].fileSwitches.push(new ASSSwitcher(i).template);
             }
+            let wSceneMc = new WSceneItem(i, locks, fullscreen).template;
             this.template.sources.push(new WCSource(i).template);
-            this.template.sources.push(new IScene(i).template);
-            wallScene.template.settings.items.push(new WSceneItem(i).template);
             if (locks) {
                 this.template.sources.push(new LockSource(i).template);
-                wallScene.template.settings.items.push(new WSceneLock(i).template);
+                lockGroup.settings.items.push(new WSceneLock(i, false).template);
+                mcGroup.settings.items.push(new WSceneItem(i, false, fullscreen).template);
+                wallScene.template.settings.items.push(new WSceneLock(i, true).template);
             }
+            wallScene.template.settings.items.push(wSceneMc);
+            this.template.sources.push(new IScene(i).template);
         }
         if (switchMethod == "ASS") {
             this.template.modules["advanced-scene-switcher"].fileSwitches.push(new ASSSwitcher(0).template);
@@ -426,11 +559,20 @@ class WallSceneCollection extends Template
             delete this.template.modules["advanced-scene-switcher"];
         }
 
+        if (locks)
+        {
+            this.template.groups.push(mcGroup);
+            this.template.groups.push(lockGroup);
+
+            wallScene.template.settings.items.push(new WSceneGroup(false).template);
+            wallScene.template.settings.items.push(new WSceneGroup(true).template);
+        }
+
         this.template.sources.push(wallScene.template);
     }
 }
 
-app.get("/wallDownload", (req, res) => {
+app.get("/wallDL", (req, res) => {
     rows = Math.floor(req.query.rows);
     cols = Math.floor(req.query.cols);
 
@@ -490,9 +632,10 @@ app.get("/wallDownload", (req, res) => {
 
     let wall = new WallSceneCollection();
     console.log("Successfully generated wall scene with " + rows + " rows and " + cols + " columns.");
-    res.end(JSON.stringify(wall.template));
+    // res.end(JSON.stringify(wall.template, null, 2));
+    res.end("<a download='" + cols + "x" + rows + " wall.json' href='data:application/txt," + encodeURI(JSON.stringify(wall.template, null, 2)) + "'>Click here to download</a>");
 });
 
-for (i = 0; i < ids.users.length; i++) {
-    startHandlingEvents(ids.users[i]);
-}
+// for (i = 0; i < ids.users.length; i++) {
+//     startHandlingEvents(ids.users[i]);
+// }
