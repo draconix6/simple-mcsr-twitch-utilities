@@ -20,7 +20,8 @@
                 <p>After submit is clicked, you will be given a file to download.</p>
                 <p>The downloaded file should be dragged into OBS > Scene Collection > Import.</p>
                 <p>Then a new scene collection will be available.</p>
-                <p>I recommend using the <a href="https://obsproject.com/forum/resources/source-copy.1261/">Source Copy</a> plugin to transfer your existing overlay sources</p>
+                <p>I recommend using the <a href="https://obsproject.com/forum/resources/source-copy.1261/">Source Copy</a> plugin to transfer your existing overlay sources.</p>
+                <p class="highlight">If you have any issues with black screens/instances, try opening the Fullscreen Projector by right clicking on "The Wall" in the Scenes panel.</p>
                 <!-- <p>OR, use OBS > Scene Collection > Export, upload below,</p>
                 <p>and the generated collection will use your "Overlay" scene.</p> -->
             </header>
@@ -66,7 +67,7 @@
                             [ <input type="text" name="switchArray" id="arrayBox" placeholder="WIP - set hotkeys manually" disabled="true"></input> ]</p> <!-- '"Key1","Key2",etc.' -->
                             <p><input type="radio" name="switchMethod" value="ASS" id="assButton"></input>ASS (Advanced Scene Switcher)</p>
                             <p>Path to instance.txt (for ASS): <input type="text" name="assPath" id="assBox" placeholder="D:\Macro\data\instance.txt"></input></p>
-                            <p><input type="radio" name="switchMethod" value="rawalle"></input>Rawalle OBS Controller <a href="https://github.com/joe-ldp/Rawalle/releases/tag/v1.4.0-beta1">(setup)</a>
+                            <p><input type="radio" name="switchMethod" value="rawalle"></input>Boyenn macro/Ravalle's OBS Controller <a href="https://github.com/joe-ldp/Rawalle/releases/tag/v1.4.0-beta1">(setup)</a>
                         </div>
                         <div>
                             <p>
@@ -87,6 +88,14 @@
                                 Instance name format (for specnr macro locks): <input type="text" name="instFormat" placeholder="Instance *"></input>
                             </p>
                         </div>
+                        <div>
+                            <p>
+                                Include other instances on scenes (for proof recording, similar to classic multi) <input type="checkbox" name="proof" id="proof"></input>
+                            </p>
+                            <p>
+                                Crop other instances to show only loading screen (may need manual adjustment) <input type="checkbox" name="loading" id="loading" disabled="true"></input>
+                            </p>
+                        </div>
                     </div>
                     <p>
                         <input type="submit" value="Submit"></input>
@@ -95,7 +104,7 @@
             </content>
         </main>
         <footer>
-            made by draconix // <a href="https://github.com/draconix6/simple-mcsr-twitch-utilities">github</a>
+            <p>made by draconix // <a href="https://github.com/draconix6/simple-mcsr-twitch-utilities">github</a></p>
         </footer>
 
         <script>
@@ -110,7 +119,10 @@
                     }
                 }
             }
-
+            
+            document.getElementById("proof").onclick = function() {
+                document.getElementById("loading").disabled = document.getElementById("proof").checked == "checked";
+            }
 
             // arrayButton = document.getElementById("arrayButton");
             // arrayButton.onclick = function() {

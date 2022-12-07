@@ -17,6 +17,7 @@
       "push-to-talk": false,
       "push-to-talk-delay": 0,
       "settings": {
+        "priority":1,
         "window": "Minecraft* - Instance 1:GLFW30:javaw.exe"
       },
       "sync": 0,
