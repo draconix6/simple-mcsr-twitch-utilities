@@ -435,6 +435,9 @@ class IScene extends Template
             this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_NUM" + instNum;
             this.template.hotkeys["OBSBasic.SelectScene"][1].key = "OBS_KEY_NUM" + instNum;
         }
+        else if (switchMethod == "ASS" || switchMethod == "rawalle") {
+            delete this.template.hotkeys["OBSBasic.SelectScene"];
+        }
         this.template.name = "Instance " + instNum;
         this.template.settings.items[0].name = "mc " + instNum;
         // for (var i = 0; i < 2; i++) {
@@ -532,6 +535,9 @@ class WScene extends Template
         // if (switchMethod == "N" || switchMethod == "F") {
         //     this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_F12";
         // }
+        if (switchMethod == "ASS" || switchMethod == "rawalle") {
+            delete this.template.hotkeys["OBSBasic.SelectScene"];
+        }
     }
 }
 
@@ -653,8 +659,8 @@ app.get("/wallDL", (req, res) => {
 
     let wall = new WallSceneCollection();
     console.log("Successfully generated wall scene with " + rows + " rows and " + cols + " columns.");
-    // res.end(JSON.stringify(wall.template, null, 2));
-    res.end("<head><link rel='stylesheet' href='./style.css'/></head><body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'><script type='text/javascript'>$(document).ready(function () {$('a').click();});</script><a style='font-size:30px;' download='" + cols + "x" + rows + " wall.json' href='data:application/txt," + encodeURI(JSON.stringify(wall.template, null, 2)) + "'><strong>Click to download</strong></a></body>");
+    res.end(JSON.stringify(wall.template, null, 2));
+    // res.end("<head><link rel='stylesheet' href='./style.css'/></head><body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'><script type='text/javascript'>$(document).ready(function () {$('a').click();});</script><a style='font-size:30px;' download='" + cols + "x" + rows + " wall.json' href='data:application/txt," + encodeURI(JSON.stringify(wall.template, null, 2)) + "'><strong>Click to download</strong></a></body>");
     // res.end('<html><head><meta http-equiv="Refresh" content="0; url="data:application/txt,' + encodeURI(JSON.stringify(wall.template, null, 2)) + '"/></head><body></body></html>')
 });
 
