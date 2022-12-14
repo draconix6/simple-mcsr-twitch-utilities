@@ -348,7 +348,7 @@ class ASSSwitcher extends Template
 {
     constructor(instNum) {
         super("./templates/assFileSwitchTemplate.json");
-        this.template.file = assPath;
+        this.template.file = assPath.replace("\\","\\\\");
         if (instNum == 0) {
             this.template.target = "The Wall";
         }
@@ -625,7 +625,7 @@ app.get("/wallDL", (req, res) => {
     }
 
     switchMethod = req.query.switchMethod;
-    assPath = req.query.assPath;
+    assPath = req.query.assPath.replace(/\\/g,"/");
     fullscreen = req.query.fullscreen;
     proof = req.query.proof;
     loading = req.query.loading;
@@ -659,8 +659,11 @@ app.get("/wallDL", (req, res) => {
 
     let wall = new WallSceneCollection();
     console.log("Successfully generated wall scene with " + rows + " rows and " + cols + " columns.");
-    res.end(JSON.stringify(wall.template, null, 2));
-    // res.end("<head><link rel='stylesheet' href='./style.css'/></head><body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'><script type='text/javascript'>$(document).ready(function () {$('a').click();});</script><a style='font-size:30px;' download='" + cols + "x" + rows + " wall.json' href='data:application/txt," + encodeURI(JSON.stringify(wall.template, null, 2)) + "'><strong>Click to download</strong></a></body>");
+    // res.end(JSON.stringify(wall.template, null, 2));
+    var noLineBreaks = `'${JSON.stringify(wall.template, null, 0)}'`;
+    // noLineBreaks = noLineBreaks.replace(/[\r\n]+/gm, "" );
+    res.end(`<head><link rel='stylesheet' href='./style.css'/></head><body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'>Your download should have begun. If there are issues, please contact draconix#6540<script type='text/javascript'>function download(content, filename, contentType){if(!contentType) contentType = 'application/octet-stream';var a = document.createElement("a");var blob = new Blob([content], {'type':contentType});a.href = window.URL.createObjectURL(blob);a.download = '${cols}x${rows} wall.json';a.click();}download(${noLineBreaks}, '', 'text/plain')</script></body>`); // href='data:application/txt," + encodeURI(JSON.stringify(wall.template, null, 2)) + "' || $(document).ready(function () {$('a2').click();} || 
+    // res.end(`<head><link rel='stylesheet' href='./style.css'/></head><body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'><a id='a2' style='font-size:30px;' download='" + cols + "x" + rows + " wall.json' href='data:application/octet-stream," + encodeURI(JSON.stringify(wall.template, null, 2)) + "'><strong>Click to download</strong></a><script type='text/javascript' src='/FileSaver.js'></script><script type='text/javascript'>var blob = new Blob(['${JSON.stringify(wall.template, null, 2)}'], {type: 'text/plain;charset=utf-8'}); saveAs(blob, "${cols}x${rows} wall.json");</script></body>`); // $(document).ready(function () {$('a2').click();}
     // res.end('<html><head><meta http-equiv="Refresh" content="0; url="data:application/txt,' + encodeURI(JSON.stringify(wall.template, null, 2)) + '"/></head><body></body></html>')
 });
 
