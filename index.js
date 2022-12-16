@@ -649,7 +649,7 @@ app.get("/wallDL", (req, res) => {
             lockWidth = 320;
             lockHeight = 320;
         }
-        multiPath = req.query.multiPath.replace("\\","/").replace("\\","/");
+        multiPath = req.query.multiPath.replace(/\\/g,"/");
         instFormat = req.query.instFormat;
         if (!multiPath || !instFormat) {
             multiPath = "";
