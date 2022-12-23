@@ -71,10 +71,10 @@ class WSceneItem extends Template
             this.template.pos.y = settings.screenHeight - this.template.bounds.y * (instNum - yOffset);
         }
         else {
-            this.template.bounds.x = settings.wallItemWidth - settings.padding * 2;
-            this.template.bounds.y = settings.wallItemHeight - settings.padding * 2;
-            this.template.pos.x = (settings.wallItemWidth + settings.padding) * ((instNum - 1) % settings.cols);
-            this.template.pos.y = (settings.wallItemHeight + settings.padding) * Math.floor((instNum - 1) / settings.cols);
+            this.template.bounds.x = settings.wallItemWidth - settings.padding;
+            this.template.bounds.y = settings.wallItemHeight - settings.padding;
+            this.template.pos.x = (settings.wallItemWidth + settings.padding / 2) * ((instNum - 1) % settings.cols);
+            this.template.pos.y = (settings.wallItemHeight + settings.padding / 2) * Math.floor((instNum - 1) / settings.cols);
         }
         if (groupItem)
         {
