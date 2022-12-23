@@ -1,341 +1,8 @@
-// const axios = require('axios');
+const fs = require('fs');
 const express = require('express');
 const app = express();
 
-const fs = require('fs');
-
-// const { ApiClient } = require('@twurple/api');
-// const { ClientCredentialsAuthProvider } = require('@twurple/auth');
-// const { EventSubListener } = require('@twurple/eventsub');
-// const { NgrokAdapter } = require('@twurple/eventsub-ngrok');
-
-// ids = JSON.parse(fs.readFileSync("./token.json", "utf-8"));
-
-// const authProvider = new ClientCredentialsAuthProvider(ids.twitchId, ids.twitchSecret);
-// const apiClient = new ApiClient({ authProvider });
-
-// const listener = new EventSubListener({apiClient, adapter: new NgrokAdapter(), secret: ids.eventSubSecret, strictHostCheck: true});
-
-// listener.listen().catch((error) => console.log(error));
-// apiClient.eventSub.deleteAllSubscriptions();
-
-// // gets streamer id when supplied valid username
-// async function getStreamerId(username) {
-// 	const user = await apiClient.users.getUserByName(username)
-//     .catch(() => {
-//         return false;
-//     });
-// 	if (!user) {
-// 		return false;
-// 	}
-//     return user.id;
-// }
-
-// function getUserIndex(username) {
-//     for (i = 0; i < ids.users.length; i++) {
-//         if (ids.users[i].twitchUser == username) {
-//             return i;
-//         }
-//     }
-//     return -1;
-// }
-
-// // subscribe to various twitch api events using twitch user id defined in token.json, and also handle requests to the server responding with info from sheets
-// function startHandlingEvents(userInfo) {
-//     listener.subscribeToChannelRaidEventsTo(userInfo.twitchChannelId, e => onRaid(e)).catch((error) => console.log(error));
-//     listener.subscribeToStreamOfflineEvents(userInfo.twitchChannelId, h => offlineTimer(userInfo)).catch((error) => console.log(error));
-//     listener.subscribeToStreamOnlineEvents(userInfo.twitchChannelId, j => checkIfReconnect(userInfo)).catch((error) => console.log(error));
-//     console.log(`Now handling runs for user ${userInfo.twitchUser}`);
-// }
-
-// // used to get new nightbot command id. do not need to use very much if already have it, or not using nightbot functionality
-// function getCommandId(token) {
-//     axios.get('https://api.nightbot.tv/1/commands/', { headers: {'Authorization':`Bearer ${token}`} })
-//     .then((response) => {
-//         for (i = 0 ; i < response.data.commands.length; i++) {
-//             if (response.data.commands[i].name == "!today") {
-//                 console.log(response.data.commands[i]._id);
-//                 break;
-//             }
-//         }
-//     })
-//     .catch(error => console.error(error));
-// }
-
-// // 10 minute timer which will set channel state to offline if streamer spends 10 minutes offline, used to account for disconnection issues
-// function offlineTimer(user) {
-//     var userIndex = getUserIndex(user.twitchUser);
-//     ids.users[userIndex].offlineTimer = true;
-//     console.log("User " + user.twitchUser + " went offline. Waiting for 10 minutes to reset commands");
-//     setTimeout(() => {
-//         if (ids.users[userIndex].channelOnline && ids.users[userIndex].offlineTimer) {
-//             ids.users[userIndex].channelOnline = false;
-//             ids.users[userIndex].offlineTimer = false;
-//             if (ids.users[userIndex].raids != "") {
-//                 ids.users[userIndex].raids = "-";
-//             }
-//             console.log("User " + user.twitchUser + " has been offline for 10 minutes.");
-//         }
-//     }, 10 * 60 * 1000);
-// }
-
-// // runs getFirstCellDate if user was truly offline (ie. didn't reconnect when offlineTimer was true) when stream started, to avoid command resetting if accidental disconnect
-// function checkIfReconnect(user) {
-//     var userIndex = getUserIndex(user.twitchUser);
-//     console.log("User " + user.twitchUser + " has started streaming");
-//     ids.users[userIndex].channelOnline = true;
-//     if (!user.offlineTimer && user.googleSheetId != "") {
-//         getFirstCellDate(user.googleSheetId).then(async (response) => {
-//             ids.users[userIndex].dateToTrackFrom = response;
-//         });
-//     }
-// }
-
-// // gets the current command and asks to update it with new raider info
-// function onRaid(raidInfo) {
-//     var userIndex = getUserIndex(raidInfo.raidedBroadcasterName);
-//     var raids = ids.users[userIndex].raids;
-//     if (raids == "-") raids = "";
-//     ids.users[userIndex].raids = raids + ` ${raidInfo.raidingBroadcasterName} (${raidInfo.viewers})`;
-//     console.log("User " + ids.users[userIndex].twitchUser + "'s raid command updated: " + ids.users[userIndex].raids);
-// }
-
-// // gets the cell in the sheet provided containing the date of the last entry in the stats sheet, pertaining to the end of the last session
-// async function getFirstCellDate(sheetId) {
-//     var dateToReturn;
-//     await axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/'Raw Data'!A2?key=${ids.googleApiKey}`)
-//     .then((response) => {
-//         dateToReturn = response.data.values[0][0];
-//     })
-//     .catch((error) => {
-//         console.error(error);
-//         dateToReturn = "9/15/2022 12:00:00";
-//     });
-//     return dateToReturn;
-// }
-
-// // this is currently not being used as async is shitting on me, currently being run directly when get request is received
-// // gets the user's spreadsheet, today's runs and returns them
-// async function getTodayRuns(userInfo) {
-//     await axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${userInfo.googleSheetId}/values/'Raw Data'!A:L?key=${ids.googleApiKey}`)
-//     .then((response) => {
-//         // column L = indexes of multiple 11 in array
-//         // could find a more efficient way to cycle through values later
-//         var blinds = "No blinds today";
-//         for (i = 12; i < response.data.values.length; i++) {
-//             if (response.data.values[i][11]) {
-//                 if (blinds == "No blinds today") {
-//                     blinds = "Nether exits today: ";
-//                 }
-//                 else {
-//                     blinds = blinds + ", ";
-//                 }
-//                 blinds = blinds + response.data.values[i][11];
-//             }
-//             if (response.data.values[i][0] == userInfo.dateToTrackFrom) {
-//                 console.log("Successfully processed request for " + userInfo.twitchUser + "'s blinds: " + blinds);
-//                 return blinds;
-//             }
-//         }
-//     })
-//     .catch((error) => console.error(error));
-//     // add back nightbot functionality later(?)
-// }
-
-// // today command updater
-// app.get("/todayUrl", async (req, res) => {
-//     var idToAdd = await getStreamerId(req.query.user);
-//     if (idToAdd) {
-//         var sheetId = req.query.sheet.split("/");
-//         for (i = 0; i < sheetId.length; i++) {
-//             if (sheetId[i] == "d") {
-//                 sheetId = sheetId[i + 1];
-//                 break;
-//             }
-//         }
-//         getFirstCellDate(sheetId).then(async (response) => {
-//             var userIndex = getUserIndex(req.query.user);
-//             if (userIndex == -1) {
-//                 userInfo = {
-//                     twitchUser: `${req.query.user}`,
-//                     twitchChannelId: `${idToAdd}`,
-//                     channelOnline: true,
-//                     offlineTimer: false,
-//                     raids: "",
-//                     googleSheetId: `${sheetId}`,
-//                     dateToTrackFrom: `${response}`
-//                 };
-//                 startHandlingEvents(userInfo);
-//                 ids.users.push(userInfo);
-//                 console.log("Pushed new user " + req.query.user + " for today command.");
-//                 // below two lines can be outside of the if statement if a workaround for editing anyone's command is found - signing into twitch?
-//                 fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
-//                 // send !editcom templates for common chatbots
-//                 res.end(`<p>Nightbot: !editcom !today $(urlfetch https://today-command-updater.web.app/today?user=${req.query.user})</p>
-//                 <p>StreamElements: !commands edit !today $(urlfetch https://today-command-updater.web.app/today?user=${req.query.user})</p>
-//                 <p>Fossabot: !editcmd !today $(customapi https://today-command-updater.web.app/today?user=${req.query.user})</p>
-//                 <p>If you use a different chatbot, refer to the "variables" documentation of your chatbot to read from this URL: https://today-command-updater.web.app/today?user=${req.query.user}</p>`);
-//             }
-//             else {
-//                 res.end(`<p>User is already registered. Contact draconix#6540 if you would like to change your spreadsheet.</p>
-//                 <p>https://today-command-updater.web.app/today?user=${req.query.user}</p>`);
-//                 // ids.users[userIndex].googleSheetId = sheetId;
-//                 // ids.users[userIndex].dateToTrackFrom = response;
-//                 // console.log("Edited existing user " + req.query.user + " for today command.");
-//             }
-//         });
-//     }
-//     else {
-//         res.end("User not found");
-//     }
-// });
-
-// app.get(`/today`, async (req, res) => {
-//     var userInfo = await ids.users[getUserIndex(req.query.user)];
-//     if (userInfo) {
-//         axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${userInfo.googleSheetId}/values/'Raw Data'!A:N?key=${ids.googleApiKey}`)
-//         .then((response) => {
-//             // column L = indexes of multiple 11 in array - nether exits
-//             // column M = indexes of multiple 12 in array - stronghold enters
-//             // column N = indexes of multiple 13 in array - end enters
-//             // could find a more efficient way to cycle through values later
-//             var blinds = "No blinds today";
-//             var strongholds = "";
-//             var ends = "";
-//             for (i = 1; i < response.data.values.length; i++) {
-//                 if (response.data.values[i][11]) {
-//                     if (blinds == "No blinds today") {
-//                         blinds = "Nether exits today: ";
-//                     }
-//                     else {
-//                         blinds = blinds + ", ";
-//                     }
-//                     blinds = blinds + response.data.values[i][11];
-//                 }
-//                 if (response.data.values[i][12]) {
-//                     if (strongholds == "") {
-//                         strongholds = " Stronghold enters today: ";
-//                     }
-//                     else {
-//                         strongholds = strongholds + ", ";
-//                     }
-//                     strongholds = strongholds + response.data.values[i][12];
-//                 }
-//                 if (response.data.values[i][13]) {
-//                     if (ends == "") {
-//                         ends = " End enters today: ";
-//                     }
-//                     else {
-//                         ends = ends + ", ";
-//                     }
-//                     ends = ends + response.data.values[i][13];
-//                 }
-//                 if (response.data.values[i][0] == userInfo.dateToTrackFrom) {
-//                     console.log("Successfully processed request for " + userInfo.twitchUser + "'s pace: " + blinds + strongholds + ends);
-//                     break;
-//                 }
-//             }
-//             // res.end(blinds + strongholds + ends) // return blinds;
-//             res.end(`Automatic today command is currently not working :\\`);
-//         })
-//         .catch((error) => console.error(error));
-//     }
-//     else {
-//         res.end("User not found");
-//     }
-// });
-
-// // raid command updater
-// app.get("/raidUrl", async (req, res) => {
-//     var idToAdd = await getStreamerId(req.query.user);
-//     if (idToAdd) {
-//         userIndex = getUserIndex(req.query.user);
-//         if (userIndex == -1) {
-//             userInfo = {
-//                 twitchUser: `${req.query.user}`,
-//                 twitchChannelId: `${idToAdd}`,
-//                 channelOnline: true,
-//                 offlineTimer: false,
-//                 raids: "-",
-//                 googleSheetId: "",
-//                 dateToTrackFrom: ""
-//             };
-//             ids.users.push(userInfo);
-//             startHandlingEvents(userInfo);
-//             console.log("Pushed new user " + req.query.user + " for raid command.");
-//         }
-//         else {
-//             ids.users[userIndex].raids = "-";
-//             console.log("Edited existing user " + req.query.user + " for raid command.");
-//         }
-//         fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
-//         // send !editcom templates for common chatbots
-//         res.end(`<p>Nightbot: !editcom !today $(urlfetch https://today-command-updater.web.app/raid?user=${req.query.user})</p>
-//         <p>StreamElements: !commands edit !today $(urlfetch https://today-command-updater.web.app/raid?user=${req.query.user})</p>
-//         <p>Fossabot: !editcmd !today $(customapi https://today-command-updater.web.app/raid?user=${req.query.user})</p>
-//         <p>If you use a different chatbot, refer to the "variables" documentation of your chatbot to read from this URL: https://today-command-updater.web.app/raid?user=${req.query.user}</p>`);
-//     }
-//     else {
-//         res.end("User not found");
-//     }
-// });
-
-// app.get(`/raid`, async (req, res) => {
-//     var userInfo = await ids.users[getUserIndex(req.query.user)];
-//     if (userInfo) {
-//         var raids = userInfo.raids;
-//         if (raids) {
-//             // res.end(raids);
-//             res.end(`Automatic raid command is currently not working :\\`);
-//             console.log("Successfully processed request for " + req.query.user + "'s raids: " + raids);
-//         }
-//         else {
-//             res.end("User not registered for raids");
-//         }
-//     }
-//     else {
-//         res.end("User not found");
-//     }
-// });
-
-// // manually reset commands, because google is not kind and won't do it itself
-// app.get(`/reset`, async (req, res) => {
-//     var msg = "";
-//     var userIndex = await getUserIndex(req.query.user);
-//     if (userIndex != -1) {
-//         if (ids.users[userIndex].googleSheetId != "") {
-//             await getFirstCellDate(ids.users[userIndex].googleSheetId)
-//             .then(async (response) => {
-//                 ids.users[userIndex].dateToTrackFrom = response;
-//                 msg = msg + req.query.user + " date updated to " + response;
-//             })
-//             .catch((err) => res.end(err));
-//         }
-//         if (ids.users[userIndex].raids != "") {
-//             ids.users[userIndex].raids = "-";
-//             if (msg != "") {
-//                 msg = msg + "\n";
-//             }
-//             msg = msg + req.query.user + " raids reset";
-//         }
-//         fs.writeFileSync("./token.json", JSON.stringify(ids, null, 2));
-//     }
-//     else {
-//         msg = "User not found";
-//     }
-//     console.log("Reset commands for " + req.query.user);
-//     res.end(msg);
-// });
-
 // wall scene maker
-var rows = 2;
-var cols = 3;
-var switchMethod = "N";
-var assPath = "";
-var fullscreen = false;
-var locks = false;
-var proof = false;
-var loading = false;
 
 class Template
 {
@@ -346,9 +13,9 @@ class Template
 
 class ASSSwitcher extends Template
 {
-    constructor(instNum) {
+    constructor(path, instNum) {
         super("./templates/assFileSwitchTemplate.json");
-        this.template.file = assPath.replace("\\","\\\\");
+        this.template.file = path;
         if (instNum == 0) {
             this.template.target = "The Wall";
         }
@@ -359,19 +26,15 @@ class ASSSwitcher extends Template
     }
 }
 
-class GCSource extends Template
+class CaptureSource extends Template
 {
-    constructor(instNum) {
-        super("./templates/gcTemplate.json");
-        this.template.name = "mc " + instNum;
-        this.template.settings.window = "Minecraft* - Instance " + instNum + ":GLFW30:javaw.exe";
-    }
-}
-
-class WCSource extends Template
-{
-    constructor(instNum) {
-        super("./templates/wcTemplate.json");
+    constructor(gc, instNum) {
+        if (gc) {
+            super(`./templates/gcTemplate.json`);
+        }
+        else {
+            super("./templates/wcTemplate.json");
+        }
         this.template.name = "mc " + instNum;
         this.template.settings.window = "Minecraft* - Instance " + instNum + ":GLFW30:javaw.exe";
     }
@@ -379,7 +42,7 @@ class WCSource extends Template
 
 class LockSource extends Template
 {
-    constructor(instNum) {
+    constructor(instNum, multiPath, instFormat) {
         super("./templates/lockTemplate.json");
         this.template.name = "lock " + instNum;
         if (multiPath && instFormat) {
@@ -393,25 +56,25 @@ class LockSource extends Template
 
 class WSceneItem extends Template
 {
-    constructor(instNum, groupItem, proof, loading, yOffset) {
+    constructor(settings, instNum, groupItem, proof = false, yOffset = 0) {
         super("./templates/wallSceneItemTemplate.json");
         this.template.name = "mc " + instNum;
         this.template.id = instNum
         if (proof) {
-            this.template.bounds.x = screenWidth / 6;
-            this.template.bounds.y = screenHeight / (2 * instCount); // 2 here is the amount of screen the instances will take up
-            if (loading) {
-                this.template.crop_right = screenWidth / 2.25;
-                this.template.crop_top = screenHeight / 2.5 / 2.5; // second 2.5 here is the normal width multiplier
+            this.template.bounds.x = settings.screenWidth / 6;
+            this.template.bounds.y = settings.screenHeight / (2 * settings.instCount); // 2 here is the amount of screen the instances will take up
+            if (settings.loading) {
+                this.template.crop_right = settings.screenWidth / 2.25;
+                this.template.crop_top = settings.screenHeight / 2.5 / 2.5; // second 2.5 here is the normal width multiplier
             }
-            this.template.pos.x = screenWidth - this.template.bounds.x;
-            this.template.pos.y = screenHeight - this.template.bounds.y * (instNum - yOffset);
+            this.template.pos.x = settings.screenWidth - this.template.bounds.x;
+            this.template.pos.y = settings.screenHeight - this.template.bounds.y * (instNum - yOffset);
         }
         else {
-            this.template.bounds.x = wallItemWidth
-            this.template.bounds.y = wallItemHeight;
-            this.template.pos.x = wallItemWidth * ((instNum - 1) % cols);
-            this.template.pos.y = wallItemHeight * Math.floor((instNum - 1) / cols);
+            this.template.bounds.x = settings.wallItemWidth - settings.padding * 2;
+            this.template.bounds.y = settings.wallItemHeight - settings.padding * 2;
+            this.template.pos.x = (settings.wallItemWidth + settings.padding) * ((instNum - 1) % settings.cols);
+            this.template.pos.y = (settings.wallItemHeight + settings.padding) * Math.floor((instNum - 1) / settings.cols);
         }
         if (groupItem)
         {
@@ -422,63 +85,62 @@ class WSceneItem extends Template
 
 class IScene extends Template
 {
-    constructor(instNum, proof, loading) {
+    constructor(settings, instNum) {
         super("./templates/instSceneTemplate.json");
-        if (switchMethod == "F") {
+        if (settings.switchMethod == "F") {
             this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_F" + (instNum + 12);
             this.template.hotkeys["OBSBasic.SelectScene"][1].key = "OBS_KEY_F" + (instNum + 12);
         }
-        else if (switchMethod == "ARR") {
+        else if (settings.switchMethod == "ARR") {
             // keyToSet = switchArray[instNum];
         }
-        else if (switchMethod == "N") {
+        else if (settings.switchMethod == "N") {
             this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_NUM" + instNum;
             this.template.hotkeys["OBSBasic.SelectScene"][1].key = "OBS_KEY_NUM" + instNum;
         }
-        else if (switchMethod == "ASS" || switchMethod == "rawalle") {
+        else if (settings.switchMethod == "ASS" || settings.switchMethod == "rawalle") {
             delete this.template.hotkeys["OBSBasic.SelectScene"];
         }
         this.template.name = "Instance " + instNum;
         this.template.settings.items[0].name = "mc " + instNum;
         // for (var i = 0; i < 2; i++) {
-            this.template.settings.items[0].bounds.x = screenWidth;
-            this.template.settings.items[0].bounds.y = screenHeight;
+            this.template.settings.items[0].bounds.x = settings.screenWidth;
+            this.template.settings.items[0].bounds.y = settings.screenHeight;
         // }
-        if (proof) {
+        if (settings.proof) {
             var yOffset = 0;
-            for (var i = 1; i <= instCount; i++)
-            {
+            for (var i = 1; i <= settings.instCount; i++) {
                 if (i != instNum) {
-                    this.template.settings.items.push(new WSceneItem(i, false, true, loading, yOffset).template);
+                    this.template.settings.items.splice(1, 0, new WSceneItem(settings, i, false, true, yOffset).template);
                 }
                 if (i == instNum) {
                     yOffset = 1;
                 }
             }
-            this.template.settings.items[1].id = instCount + 1;
+            this.template.settings.items[1].id = settings.instCount + 1; // settings.instCount + 1
         }
     }
 }
 
 class WSceneLock extends Template
 {
-    constructor(instNum, groupItem) {
+    constructor(settings, instNum, groupItem) {
         super("./templates/wallSceneLockTemplate.json");
         this.template.name = "lock " + instNum;
-        this.template.id = instCount + instNum
-        this.template.bounds.x = lockWidth
-        this.template.bounds.y = lockHeight;
-        this.template.pos.x = wallItemWidth * ((instNum - 1) % cols);
-        this.template.pos.y = wallItemHeight * Math.floor((instNum - 1) / cols);
-        if (lockPos == "tr") {
-            this.template.pos.x += wallItemWidth - lockWidth;
+        this.template.id = settings.instCount + instNum
+        this.template.bounds.x = settings.lockWidth
+        this.template.bounds.y = settings.lockHeight;
+        this.template.pos.x = settings.wallItemWidth * ((instNum - 1) % settings.cols);
+        this.template.pos.y = settings.wallItemHeight * Math.floor((instNum - 1) / settings.cols);
+        if (settings.lockPos == "tr") {
+            this.template.pos.x += settings.wallItemWidth - settings.lockWidth;
         }
-        else if (lockPos == "bl") {
-            this.template.pos.y += wallItemHeight - lockHeight;
+        else if (settings.lockPos == "bl") {
+            this.template.pos.y += settings.wallItemHeight - settings.lockHeight;
         }
-        else if (lockPos == "br") {
-            this.template.pos.x += wallItemWidth - lockWidth;
-            this.template.pos.y += wallItemHeight - lockHeight;
+        else if (settings.lockPos == "br") {
+            this.template.pos.x += settings.wallItemWidth - settings.lockWidth;
+            this.template.pos.y += settings.wallItemHeight - settings.lockHeight;
         }
         if (groupItem)
         {
@@ -489,7 +151,7 @@ class WSceneLock extends Template
 
 class GroupSource extends Template
 {
-    constructor(type) {
+    constructor(settings, type) {
         super("./templates/groupTemplate.json");
         if (type == "lock")
         {
@@ -503,8 +165,8 @@ class GroupSource extends Template
         {
             this.template.name = "proof";
         }
-        this.template.settings.cx = screenWidth;
-        this.template.settings.cy = screenHeight;
+        this.template.settings.cx = settings.screenWidth;
+        this.template.settings.cy = settings.screenHeight;
     }
 }
 
@@ -530,7 +192,7 @@ class WSceneGroup extends Template
 
 class WScene extends Template
 {
-    constructor() {
+    constructor(switchMethod) {
         super("./templates/wallSceneTemplate.json");
         // if (switchMethod == "N" || switchMethod == "F") {
         //     this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_F12";
@@ -543,48 +205,110 @@ class WScene extends Template
 
 class WallSceneCollection extends Template
 {
-    constructor() {
+    constructor(settings) {
         super("./templates/collectionTemplate.json");
-        this.template.name = cols + "x" + rows + " wall";
-        let wallScene = new WScene();
+
+        settings.rows = Math.floor(settings.rows);
+        settings.cols = Math.floor(settings.cols);
+        settings.instCount = settings.rows * settings.cols;;
+
+        settings.fullscreen = settings.fullscreen == "on";
+
+        if (settings.screenSize == "1080") {
+            settings.screenWidth = 1920;
+            settings.screenHeight = 1080;
+        }
+        else if (settings.screenSize == "1440") {
+            settings.screenWidth = 2560;
+            settings.screenHeight = 1440;
+        }
+        else if (settings.screenSize == "2160") {
+            settings.screenWidth = 3840;
+            settings.screenHeight = 2160;
+        }
+        else if (settings.screenSize == "custom") {
+            settings.screenWidth = Math.floor(settings.screenWidth);
+            settings.screenHeight = Math.floor(settings.screenHeight);
+            if (settings.screenWidth == 0) {
+                settings.screenWidth = settings.screenHeight * (16 / 9);
+            }
+            if (settings.screenHeight == 0) {
+                settings.screenHeight = settings.screenWidth / (16 / 9);
+            }
+            if (settings.screenWidth + settings.screenHeight == 0) {
+                settings.screenWidth = 1920;
+                settings.screenHeight = 1080;
+            }
+        }
+
+        settings.assPath = settings.assPath.replace(/\\/g,"/");
+
+        settings.wallItemWidth = Math.floor(settings.screenWidth / settings.cols);
+        settings.wallItemHeight = Math.floor(settings.screenHeight / settings.rows);
+
+        settings.locks = settings.locks == "on";
+        if (settings.locks) {
+            if (settings.lockWidth == 0) {
+                settings.lockWidth = settings.lockHeight;
+            }
+            if (settings.lockHeight == 0) {
+                settings.lockHeight = settings.lockWidth;
+            }
+            if (settings.lockWidth + settings.lockHeight == 0) {
+                settings.lockWidth = settings.wallItemWidth / 7;
+                settings.lockHeight = settings.lockWidth;
+            }
+            settings.lockWidth = Math.floor(settings.lockWidth);
+            settings.lockHeight = Math.floor(settings.lockHeight);
+
+            settings.multiPath = settings.multiPath.replace(/\\/g,"/");
+            if (!settings.multiPath || !settings.instFormat) {
+                settings.multiPath = "";
+                settings.instFormat = "";
+            }
+        }
+
+        settings.padding = Math.floor(settings.padding);
+
+        settings.proof = settings.proof == "on";
+        settings.loading = settings.loading == "on";
+
+        this.template.name = settings.cols + "x" + settings.rows + " wall";
+        let wallScene = new WScene(settings.switchMethod);
 
         // needs to be within scope of the code below
-        let mcGroup = new GroupSource("mc").template;
-        let lockGroup = new GroupSource("lock").template;
+        let mcGroup = new GroupSource(settings, "mc").template;
+        let lockGroup = new GroupSource(settings, "lock").template;
         // let proofGroup = new GroupSource("proof").template;
 
-        for (var i = 1; i <= instCount; i++)
-        {
+        for (var i = 1; i <= settings.instCount; i++) {
             this.template.scene_order.push({name:"Instance " + (i)});
-            if (fullscreen) {
-                this.template.sources.push(new GCSource(i).template);
-            }
-            else {
-                this.template.sources.push(new WCSource(i).template);
-            }
-            if (switchMethod == "ASS") {
-                this.template.modules["advanced-scene-switcher"].fileSwitches.push(new ASSSwitcher(i).template);
-            }
-            let wSceneMc = new WSceneItem(i, locks, false, 0).template;
-            if (locks) {
-                this.template.sources.push(new LockSource(i).template);
-                lockGroup.settings.items.push(new WSceneLock(i, false).template);
-                mcGroup.settings.items.push(new WSceneItem(i, false, false, 0).template);
-                wallScene.template.settings.items.push(new WSceneLock(i, true).template);
-            }
-            wallScene.template.settings.items.push(wSceneMc);
+            this.template.sources.push(new CaptureSource(settings.fullscreen, i).template);
 
-            this.template.sources.push(new IScene(i, proof, loading).template);
+            if (settings.switchMethod == "ASS") {
+                this.template.modules["advanced-scene-switcher"].fileSwitches.push(new ASSSwitcher(settings.assPath, i).template);
+            }
+
+            wallScene.template.settings.items.push(new WSceneItem(settings, i, settings.locks).template);
+            if (settings.locks) {
+                mcGroup.settings.items.push(new WSceneItem(settings, i, false).template);
+
+                this.template.sources.push(new LockSource(i, settings.multiPath, settings.instFormat).template);
+                lockGroup.settings.items.push(new WSceneLock(settings, i, false).template);
+                wallScene.template.settings.items.push(new WSceneLock(settings, i, true).template);
+            }
+
+            this.template.sources.push(new IScene(settings, i).template);
         }
-        if (switchMethod == "ASS") {
-            this.template.modules["advanced-scene-switcher"].fileSwitches.push(new ASSSwitcher(0).template);
-            this.template.modules["advanced-scene-switcher"].readPath = assPath;
+        if (settings.switchMethod == "ASS") {
+            this.template.modules["advanced-scene-switcher"].fileSwitches.push(new ASSSwitcher(settings.assPath, 0).template);
+            this.template.modules["advanced-scene-switcher"].readPath = settings.assPath;
         }
         else {
             delete this.template.modules["advanced-scene-switcher"];
         }
 
-        if (locks)
+        if (settings.locks)
         {
             this.template.groups.push(mcGroup);
             this.template.groups.push(lockGroup);
@@ -598,73 +322,30 @@ class WallSceneCollection extends Template
 }
 
 app.get("/wallDL", (req, res) => {
-    rows = Math.floor(req.query.rows);
-    cols = Math.floor(req.query.cols);
+    let wall = new WallSceneCollection(req.query);
+    console.log("Successfully generated wall scene with " + req.query.rows + " rows and " + req.query.cols + " columns.");
 
-    if (req.query.screenSize == "1080") {
-        screenWidth = 1920;
-        screenHeight = 1080;
-    }
-    else if (req.query.screenSize == "1440") {
-        screenWidth = 2560;
-        screenHeight = 1440;
-    }
-    else if (req.query.screenSize == "2160") {
-        screenWidth = 3840;
-        screenHeight = 2160;
-    }
-    else if (req.query.screenSize == "custom") {
-        screenWidth = Math.floor(req.query.screenWidth);
-        screenHeight = Math.floor(req.query.screenHeight);
-        if (screenWidth == 0) {
-            screenWidth = screenHeight * (16 / 9);
-        }
-        if (screenHeight == 0) {
-            screenHeight = screenWidth / (16 / 9);
-        }
-    }
+    var downloadPage = `
+        <head>
+            <link rel='stylesheet' href='./style.css'/>
+        </head>
+        <body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'>
+            Your download should have begun. If there are issues, please contact draconix#6540
+            <script type='text/javascript'>
+                function download(content, filename, contentType) {
+                    if (!contentType) contentType = "application/octet-stream";
+                    var a = document.createElement("a");
+                    var blob = new Blob([content], {"type":contentType});
+                    a.href = window.URL.createObjectURL(blob);
+                    a.download = filename;
+                    a.click();
+                }
+                download(${JSON.stringify(JSON.stringify(wall.template))}, "${req.query.cols}x${req.query.rows} wall.json", "application/json")
+            </script>
+        </body>
+    `;
 
-    switchMethod = req.query.switchMethod;
-    assPath = req.query.assPath.replace(/\\/g,"/");
-    fullscreen = req.query.fullscreen;
-    proof = req.query.proof;
-    loading = req.query.loading;
-
-    instCount = rows * cols;
-    wallItemWidth = Math.floor(screenWidth / cols);
-    wallItemHeight = Math.floor(screenHeight / rows);
-
-    locks = req.query.locks;
-    if (locks) {
-        lockPos = req.query.lockPos;
-        lockWidth = Math.floor(req.query.lockWidth);
-        lockHeight = Math.floor(req.query.lockHeight);
-        if (lockWidth == 0) {
-            lockWidth = lockHeight;
-        }
-        if (lockHeight == 0) {
-            lockHeight = lockWidth;
-        }
-        if (lockWidth + lockHeight == 0) {
-            lockWidth = 320;
-            lockHeight = 320;
-        }
-        multiPath = req.query.multiPath.replace(/\\/g,"/");
-        instFormat = req.query.instFormat;
-        if (!multiPath || !instFormat) {
-            multiPath = "";
-            instFormat = "";
-        }
-    }
-
-    let wall = new WallSceneCollection();
-    console.log("Successfully generated wall scene with " + rows + " rows and " + cols + " columns.");
-    // res.end(JSON.stringify(wall.template, null, 2));
-    var noLineBreaks = `'${JSON.stringify(wall.template, null, 0)}'`;
-    // noLineBreaks = noLineBreaks.replace(/[\r\n]+/gm, "" );
-    res.end(`<head><link rel='stylesheet' href='./style.css'/></head><body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'>Your download should have begun. If there are issues, please contact draconix#6540<script type='text/javascript'>function download(content, filename, contentType){if(!contentType) contentType = 'application/octet-stream';var a = document.createElement("a");var blob = new Blob([content], {'type':contentType});a.href = window.URL.createObjectURL(blob);a.download = '${cols}x${rows} wall.json';a.click();}download(${noLineBreaks}, '', 'text/plain')</script></body>`); // href='data:application/txt," + encodeURI(JSON.stringify(wall.template, null, 2)) + "' || $(document).ready(function () {$('a2').click();} || 
-    // res.end(`<head><link rel='stylesheet' href='./style.css'/></head><body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'><a id='a2' style='font-size:30px;' download='" + cols + "x" + rows + " wall.json' href='data:application/octet-stream," + encodeURI(JSON.stringify(wall.template, null, 2)) + "'><strong>Click to download</strong></a><script type='text/javascript' src='/FileSaver.js'></script><script type='text/javascript'>var blob = new Blob(['${JSON.stringify(wall.template, null, 2)}'], {type: 'text/plain;charset=utf-8'}); saveAs(blob, "${cols}x${rows} wall.json");</script></body>`); // $(document).ready(function () {$('a2').click();}
-    // res.end('<html><head><meta http-equiv="Refresh" content="0; url="data:application/txt,' + encodeURI(JSON.stringify(wall.template, null, 2)) + '"/></head><body></body></html>')
+    res.end(downloadPage);
 });
 
 app.use(express.static('public'));

@@ -43,6 +43,12 @@ a {
 nav > a {
     margin: 10px 20px;
 }
+content {
+    display:flex;
+    flex-direction: row;
+    /* uncomment below after table implementation */
+    /* width:100%; */
+}
 content > a {
     text-align: center;
 }
@@ -51,9 +57,26 @@ form {
     border-radius:10px;
     padding:10px;
     margin-bottom: 10px;
+    margin-right: 10px;
 }
 input[type=text] {
     margin: 5px;
+}
+table {
+    background-color:rgb(44, 44, 44);
+    padding:2px;
+    border-radius:5px;
+    align-self: flex-start;
+    margin-left: auto;
+    width:30%;
+    aspect-ratio: 16/9;
+}
+td {
+    background-color:rgb(32, 32, 32);
+    margin:5px;
+    padding:10px;
+    border-radius:5px;
+    text-align: center;
 }
 footer {
     display:flex;

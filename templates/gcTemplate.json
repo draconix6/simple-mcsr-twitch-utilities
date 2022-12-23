@@ -4,10 +4,7 @@
     "deinterlace_mode": 0,
     "enabled": true,
     "flags": 0,
-    "hotkeys": {
-        "hotkey_start": [],
-        "hotkey_stop": []
-    },
+    "hotkeys": {},
     "id": "game_capture",
     "mixers": 0,
     "monitoring_type": 0,

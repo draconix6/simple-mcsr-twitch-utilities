@@ -29,10 +29,10 @@
                 <form action="/wallDL" method="GET">
                     <div>
                         <p>
-                            Rows <input type="number" name="rows" min="1" max="9" value="2" required="true"></input>
+                            Rows <input oninput="changePreview()" type="number" id="rows" name="rows" min="1" max="9" value="2" required="true"></input>
                         </p>
                         <p>
-                            Columns <input type="number" name="cols" min="1" max="9" value="3" required="true"></input>
+                            Columns <input oninput="changePreview()" type="number" id="cols" name="cols" min="1" max="9" value="3" required="true"></input>
                         </p>
                     </div>
                     <div>
@@ -90,6 +90,9 @@
                         </div>
                         <div>
                             <p>
+                                Padding (gaps between wall instances) <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px
+                            </p>
+                            <p>
                                 Include other instances on scenes (for proof recording, similar to classic multi) <input type="checkbox" name="proof" id="proof"></input>
                             </p>
                             <p>
@@ -101,6 +104,8 @@
                         <input type="submit" value="Submit"></input>
                     </p>
                 </form>
+                <!-- <table class="preview" id="previewTable"></table> -->
+                </div>
             </content>
         </main>
         <footer>
@@ -123,6 +128,27 @@
             document.getElementById("proof").onclick = function() {
                 document.getElementById("loading").disabled = document.getElementById("proof").checked == "checked";
             }
+
+            function changePreview() {
+                // var rows = document.getElementById("rows").value;
+                // var cols = document.getElementById("cols").value;
+                // if (rows > 9 || rows < 1 || cols > 9 || cols < 1) return;
+                // var tableString = "";
+                // for (var x = 0; x < rows; x++) {
+                //     tableString += '<tr>';
+                //     for (var y = 0; y < cols; y++)
+                //     {
+                //         tableString += `<td width="${100 / cols}%">${y + (x * document.getElementById("cols").value) + 1}</td>`;
+                //     }
+                //     tableString += '</tr>';
+                // }
+                // document.getElementById("previewTable").innerHTML = tableString;
+            }
+
+            changePreview();
+
+            // document.getElementById("rows").addEventListener("change", changePreview());
+            // document.getElementById("cols").addEventListener("change", changePreview());
 
             // arrayButton = document.getElementById("arrayButton");
             // arrayButton.onclick = function() {
