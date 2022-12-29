@@ -61,21 +61,22 @@
                             <p>
                                 Scene switching method:
                             </p>
-                            <p><input type="radio" name="switchMethod" value="N" checked="checked"></input>N (Numpad 1-9, default)</p>
+                            <p><input type="radio" name="switchMethod" value="C" checked="checked"></input>OBS controller (default)
+                            <p><input type="radio" name="switchMethod" value="N"></input>N (Numpad 1-9)</p>
                             <p><input type="radio" name="switchMethod" value="F"></input>F (F13-F24)</p>
                             <p><input type="radio" name="switchMethod" value="ARR" id="arrayButton"></input>ARR (advanced array)
                             [ <input type="text" name="switchArray" id="arrayBox" placeholder="WIP - set hotkeys manually" disabled="true"></input> ]</p> <!-- '"Key1","Key2",etc.' -->
-                            <p><input type="radio" name="switchMethod" value="ASS" id="assButton"></input>ASS (Advanced Scene Switcher)</p>
-                            <p>Path to instance.txt (for ASS): <input type="text" name="assPath" id="assBox" placeholder="D:\Macro\data\instance.txt"></input></p>
-                            <p><input type="radio" name="switchMethod" value="rawalle"></input>OBS controller <a href="https://github.com/joe-ldp/Rawalle/releases/tag/v1.4.0-beta1">(setup)</a>
+                            <!-- <p><input type="radio" name="switchMethod" value="ASS" id="assButton"></input>ASS (Advanced Scene Switcher)</p>
+                            <p>Path to instance.txt (for ASS): <input type="text" name="assPath" id="assBox" placeholder="D:\Macro\data\instance.txt"></input></p> -->
                         </div>
                         <div>
                             <p>
                                 Lock indicators <input type="checkbox" name="locks" id="locks"></input>
                                 <input type="radio" name="lockPos" value="tl" disabled="true" checked="checked"></input>Top left
                                 <input type="radio" name="lockPos" value="tr" disabled="true"></input>Top right
-                                <input type="radio" name="lockPos" value="bl" disabled="true"></input>Bottom left
+                                <input type="radio" name="lockPos" value="bl" disabled="true" onclick="warnWP()"></input>Bottom left
                                 <input type="radio" name="lockPos" value="br" disabled="true"></input>Bottom right
+                                <input type="radio" name="lockPos" value="c" disabled="true" onclick="warnWP()"></input>Center
                             </p>
                             <p>
                                 <input type="number" name="lockWidth" min="20" max="1000" placeholder="Width"></input>
@@ -107,6 +108,9 @@
                 <!-- <table class="preview" id="previewTable"></table> -->
                 </div>
             </content>
+            <div class="highlight" id="warning" style="display: none;">
+                Warning: Locks may cover loading screens. Ensure proof recording can see center and bottom left of instances
+            </div>
         </main>
         <footer>
             <p>made by draconix // <a href="https://github.com/draconix6/simple-mcsr-twitch-utilities">github</a></p>
@@ -127,6 +131,11 @@
             
             document.getElementById("proof").onclick = function() {
                 document.getElementById("loading").disabled = document.getElementById("proof").checked == "checked";
+            }
+
+            function warnWP() {
+                document.getElementById("warning").style = "";
+                document.getElementById("warning").scrollIntoView({behavior: "smooth"});
             }
 
             function changePreview() {

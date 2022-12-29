@@ -4,15 +4,13 @@ const app = express();
 
 // wall scene maker
 
-class Template
-{
+class Template {
     constructor(templateSource) {
         this.template = JSON.parse(fs.readFileSync(templateSource));
     }
 }
 
-class ASSSwitcher extends Template
-{
+class ASSSwitcher extends Template {
     constructor(path, instNum) {
         super("./templates/assFileSwitchTemplate.json");
         this.template.file = path;
@@ -26,8 +24,7 @@ class ASSSwitcher extends Template
     }
 }
 
-class CaptureSource extends Template
-{
+class CaptureSource extends Template {
     constructor(gc, instNum) {
         if (gc) {
             super(`./templates/gcTemplate.json`);
@@ -40,8 +37,7 @@ class CaptureSource extends Template
     }
 }
 
-class LockSource extends Template
-{
+class LockSource extends Template {
     constructor(instNum, multiPath, instFormat) {
         super("./templates/lockTemplate.json");
         this.template.name = "lock " + instNum;
@@ -54,8 +50,7 @@ class LockSource extends Template
     }
 }
 
-class WSceneItem extends Template
-{
+class WSceneItem extends Template {
     constructor(settings, instNum, groupItem, proof = false, yOffset = 0) {
         super("./templates/wallSceneItemTemplate.json");
         this.template.name = "mc " + instNum;
@@ -79,12 +74,12 @@ class WSceneItem extends Template
         if (groupItem)
         {
             this.template.group_item_backup = true;
+            this.template.locked = false;
         }
     }
 }
 
-class IScene extends Template
-{
+class IScene extends Template {
     constructor(settings, instNum) {
         super("./templates/instSceneTemplate.json");
         if (settings.switchMethod == "F") {
@@ -98,7 +93,7 @@ class IScene extends Template
             this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_NUM" + instNum;
             this.template.hotkeys["OBSBasic.SelectScene"][1].key = "OBS_KEY_NUM" + instNum;
         }
-        else if (settings.switchMethod == "ASS" || settings.switchMethod == "rawalle") {
+        else if (settings.switchMethod == "ASS" || settings.switchMethod == "C") {
             delete this.template.hotkeys["OBSBasic.SelectScene"];
         }
         this.template.name = "Instance " + instNum;
@@ -122,8 +117,7 @@ class IScene extends Template
     }
 }
 
-class WSceneLock extends Template
-{
+class WSceneLock extends Template {
     constructor(settings, instNum, groupItem) {
         super("./templates/wallSceneLockTemplate.json");
         this.template.name = "lock " + instNum;
@@ -142,6 +136,10 @@ class WSceneLock extends Template
             this.template.pos.x += settings.wallItemWidth - settings.lockWidth;
             this.template.pos.y += settings.wallItemHeight - settings.lockHeight;
         }
+        else if (settings.lockPos == "c") {
+            this.template.pos.x += settings.wallItemWidth / 2 - settings.lockWidth / 2;
+            this.template.pos.y += settings.wallItemHeight / 2 - settings.lockHeight / 2;
+        }
         if (groupItem)
         {
             this.template.group_item_backup = true;
@@ -149,8 +147,7 @@ class WSceneLock extends Template
     }
 }
 
-class GroupSource extends Template
-{
+class GroupSource extends Template {
     constructor(settings, type) {
         super("./templates/groupTemplate.json");
         if (type == "lock")
@@ -170,8 +167,7 @@ class GroupSource extends Template
     }
 }
 
-class WSceneGroup extends Template
-{
+class WSceneGroup extends Template {
     constructor(lock) {
         super("./templates/wallSceneItemTemplate.json");
         if (lock)
@@ -190,14 +186,13 @@ class WSceneGroup extends Template
     }
 }
 
-class WScene extends Template
-{
+class WScene extends Template {
     constructor(switchMethod) {
         super("./templates/wallSceneTemplate.json");
         // if (switchMethod == "N" || switchMethod == "F") {
         //     this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_F12";
         // }
-        if (switchMethod == "ASS" || switchMethod == "rawalle") {
+        if (switchMethod == "ASS" || switchMethod == "C") {
             delete this.template.hotkeys["OBSBasic.SelectScene"];
         }
     }
@@ -210,7 +205,7 @@ class WallSceneCollection extends Template
 
         settings.rows = Math.floor(settings.rows);
         settings.cols = Math.floor(settings.cols);
-        settings.instCount = settings.rows * settings.cols;;
+        settings.instCount = settings.rows * settings.cols;
 
         settings.fullscreen = settings.fullscreen == "on";
 
@@ -241,6 +236,9 @@ class WallSceneCollection extends Template
             }
         }
 
+        if (!settings.assPath) {
+            settings.assPath = "";
+        }
         settings.assPath = settings.assPath.replace(/\\/g,"/");
 
         settings.wallItemWidth = Math.floor(settings.screenWidth / settings.cols);

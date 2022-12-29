@@ -21,5 +21,5 @@
     "scale":{"x":1,"y":1},
     "scale_filter":"disable",
     "show_transition":{"duration":0},
-    "visible":true
+    "visible":false
 }

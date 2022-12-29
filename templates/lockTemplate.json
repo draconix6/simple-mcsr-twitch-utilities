@@ -8,7 +8,7 @@
     "id":"image_source",
     "mixers":0,
     "monitoring_type":0,
-    "muted":false,
+    "muted":true,
     "name":"lock12",
     "prev_ver":453115908,
     "private_settings":{},
