@@ -68,13 +68,53 @@ class WSceneItem extends Template {
         else {
             this.template.bounds.x = settings.wallItemWidth - settings.padding;
             this.template.bounds.y = settings.wallItemHeight - settings.padding;
-            this.template.pos.x = (settings.wallItemWidth + settings.padding / 2) * ((instNum - 1) % settings.cols);
-            this.template.pos.y = (settings.wallItemHeight + settings.padding / 2) * Math.floor((instNum - 1) / settings.cols);
+            this.template.pos.x = (settings.wallItemWidth + Math.floor(settings.padding / 2)) * ((instNum - 1) % settings.cols);
+            this.template.pos.y = (settings.wallItemHeight + Math.floor(settings.padding / 2)) * Math.floor((instNum - 1) / settings.cols);
         }
         if (groupItem)
         {
             this.template.group_item_backup = true;
             this.template.locked = false;
+        }
+    }
+}
+
+class PSceneItem extends Template {
+    // crop: 0 = no crop, 1 = bottom-left, 2 = center
+    constructor(instNum, cols, width, height, windowWidth, windowHeight, guiScale, crop = 0, loadingSquareSize = 0, extraHeight = 0) {
+        super("./templates/wallSceneItemTemplate.json");
+        this.template.name = "verification " + instNum;
+        this.template.id = instNum;
+
+        let row = Math.floor((instNum - 1) / cols);
+        let col = Math.floor((instNum - 1) % cols);
+
+        switch (crop){
+            case 0:
+                this.template.bounds.x = width - 2 * height;
+                this.template.bounds.y = height;
+                this.template.pos.x = col * width;
+                this.template.pos.y = row * height;
+                break;
+            case 1:
+                this.template.bounds.x = height;
+                this.template.bounds.y = height;
+                this.template.pos.x = col * width + (width - height);
+                this.template.pos.y = row * height;
+                this.template.crop_top = windowHeight - extraHeight - loadingSquareSize;
+                this.template.crop_right = windowWidth - loadingSquareSize;
+                this.template.scale_filter = "point";
+                break;
+            case 2:
+                this.template.bounds.x = height;
+                this.template.bounds.y = height;
+                this.template.pos.x = col * width + (width - 2 * height);
+                this.template.pos.y = row * height;
+                this.template.crop_top = ((windowHeight - loadingSquareSize) / 2 + (guiScale * 30)) - extraHeight;
+                this.template.crop_bottom = (windowHeight - loadingSquareSize) / 2 - (guiScale * 30);
+                this.template.crop_left = (windowWidth - loadingSquareSize) / 2;
+                this.template.crop_right = (windowWidth - loadingSquareSize) / 2;
+                this.template.scale_filter = "point";
         }
     }
 }
@@ -102,7 +142,7 @@ class IScene extends Template {
             this.template.settings.items[0].bounds.x = settings.screenWidth;
             this.template.settings.items[0].bounds.y = settings.screenHeight;
         // }
-        if (settings.proof) {
+        if (settings.proof == "corner") {
             var yOffset = 0;
             for (var i = 1; i <= settings.instCount; i++) {
                 if (i != instNum) {
@@ -268,11 +308,79 @@ class WallSceneCollection extends Template
 
         settings.padding = Math.floor(settings.padding);
 
-        settings.proof = settings.proof == "on";
-        settings.loading = settings.loading == "on";
+        if (settings.guiScale == 0) {
+            settings.guiScale = 4;
+        }
+        settings.guiScale = Math.floor(settings.guiScale);
+        settings.borderless = settings.borderless == "on";
 
         this.template.name = settings.cols + "x" + settings.rows + " wall";
         let wallScene = new WScene(settings.switchMethod);
+        if (settings.proof == "scene") {
+            var proofScene = new WScene(settings.switchMethod);
+            proofScene.template.name = "Verification";
+            var windowWidth = settings.screenWidth;
+            var windowHeight = settings.screenHeight;
+
+            // new proof recording crops setup - credits to duncan
+            if (settings.widthMultiplier != 0) {
+                windowHeight = Math.floor(windowHeight / settings.widthMultiplier);
+            }
+            else if (!settings.borderless) {
+                windowWidth += 16;
+                windowHeight -= 24;
+            }
+            if (!settings.borderless) {
+                // win10 border sizes
+                windowWidth -= 16;
+                windowHeight -= 39;
+            }
+            // ---STRUCTURAL INTEGRITY DUCKS AHEAD---
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // ---END OF STRUCTURAL INTEGRITY DUCKS---
+
+            var proofRows = Math.floor(Math.sqrt(settings.instCount)) - 1;
+            var proofCols = 0;
+            var sizeRatio = 0;
+
+            do {
+                proofRows += 1;
+                proofCols = Math.ceil(settings.instCount / proofRows);
+                sizeRatio = Math.floor(settings.screenWidth / proofCols) / Math.floor(settings.screenHeight / proofRows);
+            } while (sizeRatio < 3.5 && proofCols != 1);
+
+            var proofWidth = Math.floor(settings.screenWidth / proofCols);
+            var proofHeight = Math.floor(settings.screenHeight / proofRows);
+
+            // does not account for forceUnicodeFont option being true
+            // in which case an odd number GUI scale must increment by 1
+            // idk if it's too worth
+            let x = 1;
+            while (x != settings.guiScale && x < windowWidth && x < windowHeight && windowWidth / (x + 1) >= 320 && windowHeight / (x + 1) >= 240) {
+                x++;
+            }
+
+            var loadingSquareSize = x * 90;
+            var extraHeight = x * 19;
+
+            for (var i = 1; i <= settings.instCount; i++) {
+                let proofSource = new CaptureSource(false, i);
+                proofSource.template.name = "verification " + i;
+                this.template.sources.push(proofSource.template);
+                proofScene.template.settings.items.push(new PSceneItem(i, proofCols, proofWidth, proofHeight, windowWidth, windowHeight, x).template);
+                proofScene.template.settings.items.push(new PSceneItem(i, proofCols, proofWidth, proofHeight, windowWidth, windowHeight, x, 1, loadingSquareSize, extraHeight).template);
+                proofScene.template.settings.items.push(new PSceneItem(i, proofCols, proofWidth, proofHeight, windowWidth, windowHeight, x, 2, loadingSquareSize, extraHeight).template);
+            }
+        }
 
         // needs to be within scope of the code below
         let mcGroup = new GroupSource(settings, "mc").template;
@@ -316,6 +424,9 @@ class WallSceneCollection extends Template
         }
 
         this.template.sources.push(wallScene.template);
+        if (settings.proof == "scene") {
+            this.template.sources.push(proofScene.template);
+        }
     }
 }
 
@@ -328,7 +439,7 @@ app.get("/wallDL", (req, res) => {
             <link rel='stylesheet' href='./style.css'/>
         </head>
         <body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'>
-            Your download should have begun. If there are issues, please contact draconix#6540
+            Your download should have begun. If there are issues, please message draconix#6540
             <script type='text/javascript'>
                 function download(content, filename, contentType) {
                     if (!contentType) contentType = "application/octet-stream";

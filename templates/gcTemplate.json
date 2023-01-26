@@ -18,7 +18,7 @@
     "push-to-talk-delay": 0,
     "settings": {
         "capture_mode": "window",
-        "priority": 0,
+        "priority": 1,
         "window": "Minecraft* - Instance 9:GLFW30:javaw.exe"
     },
     "sync": 0,

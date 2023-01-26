@@ -55,7 +55,7 @@
                     </div>
                     <div style="background-color:rgb(22, 22, 22); padding: 5px; border-radius: 5px; margin-bottom: 5px;">
                         <p>
-                            <strong>Extra/advanced options:</strong>
+                            <strong>Extra options:</strong>
                         </p>
                         <div>
                             <p>
@@ -91,13 +91,30 @@
                         </div>
                         <div>
                             <p>
-                                Padding (gaps between wall instances) <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px
+                                Padding (gaps between wall instances): <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px
+                            </p>
+                        </div>
+                        <div>
+                            <strong>Proof recording:</strong>
+                            <p class="highlight">The generator cropping may not be accurate, depending on your setup.</p>
+                            <p class="highlight">Ensure proof recording can clearly see the % of world loaded and chunkmap.</p>
+                            <p>
+                                Include a separate proof recording scene (recommended) <input type="radio" name="proof" value="scene" checked="checked"></input>
                             </p>
                             <p>
-                                Include other instances on scenes (for proof recording, similar to classic multi) <input type="checkbox" name="proof" id="proof"></input>
+                                Include other instances on scenes (similar to classic multi) <input type="radio" name="proof" value="corner"></input>
+                            </p>
+                            <!-- <p>
+                                Crop other instances to show only loading screen <input type="checkbox" name="loading" id="loading" disabled="true"></input>
+                            </p> -->
+                            <p>
+                                GUI Scale (for loading screen cropping) <input type="number" name="guiScale" min="1" max="4" placeholder="1-4"></input>
                             </p>
                             <p>
-                                Crop other instances to show only loading screen (may need manual adjustment) <input type="checkbox" name="loading" id="loading" disabled="true"></input>
+                                Width multiplier (for loading screen cropping) <input type="number" name="widthMultiplier" min="0" max="5" step="0.1" value="2.5"></input>
+                            </p>
+                            <p>
+                                Do you use borderless? <input type="checkbox" name="borderless"></input>
                             </p>
                         </div>
                     </div>
