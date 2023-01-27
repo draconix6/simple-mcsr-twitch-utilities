@@ -29,10 +29,8 @@
                 <form action="/wallDL" method="GET">
                     <div>
                         <p>
-                            Rows <input oninput="changePreview()" type="number" id="rows" name="rows" min="1" max="9" value="2" required="true"></input>
-                        </p>
-                        <p>
-                            Columns <input oninput="changePreview()" type="number" id="cols" name="cols" min="1" max="9" value="3" required="true"></input>
+                            <label>Rows <input oninput="changePreview()" type="number" id="rows" name="rows" min="1" max="9" value="2" required="true"></input></label>
+                            <label>Columns <input oninput="changePreview()" type="number" id="cols" name="cols" min="1" max="9" value="3" required="true"></input></label>
                         </p>
                     </div>
                     <div>
@@ -45,15 +43,15 @@
                             Base resolution:
                         </p>
                         <p>
-                            <input type="radio" name="screenSize" value="1080" checked="checked"></input>1920x1080
-                            <input type="radio" name="screenSize" value="1440"></input>2560x1440
-                            <input type="radio" name="screenSize" value="2160"></input>3840x2160
-                            <input type="radio" name="screenSize" value="custom" id="custom"></input>Custom
-                            <input type="number" name="screenWidth" min="1280" max="10000" placeholder="Width"></input>
-                            <input type="number" name="screenHeight" min="720" max="10000" placeholder="Height"></input>
+                            <label><input onclick="toggleCustomMembers(false)" type="radio" name="screenSize" value="1080" checked="checked"></input>1920x1080</label>
+                            <label><input onclick="toggleCustomMembers(false)" type="radio" name="screenSize" value="1440"></input>2560x1440</label>
+                            <label><input onclick="toggleCustomMembers(false)" type="radio" name="screenSize" value="2160"></input>3840x2160</label>
+                            <label><input onclick="toggleCustomMembers()" type="radio" name="screenSize" value="custom" id="custom"></input>Custom</label>
+                            <input class="customOptions" disabled="true" type="number" name="screenWidth" min="1280" max="10000" placeholder="Width"></input>
+                            <input class="customOptions" disabled="true" type="number" name="screenHeight" min="720" max="10000" placeholder="Height"></input>
                         </p>
                     </div>
-                    <div style="background-color:rgb(22, 22, 22); padding: 5px; border-radius: 5px; margin-bottom: 5px;">
+                    <div style="background-color:rgb(29, 29, 29); padding: 5px; border-radius: 5px; margin: 5px 0px;">
                         <p>
                             <strong>Extra options:</strong>
                         </p>
@@ -61,60 +59,61 @@
                             <p>
                                 Scene switching method:
                             </p>
-                            <p><input type="radio" name="switchMethod" value="C" checked="checked"></input>OBS controller (default)
-                            <p><input type="radio" name="switchMethod" value="N"></input>N (Numpad 1-9)</p>
-                            <p><input type="radio" name="switchMethod" value="F"></input>F (F13-F24)</p>
-                            <p><input type="radio" name="switchMethod" value="ARR" id="arrayButton"></input>ARR (advanced array)
-                            [ <input type="text" name="switchArray" id="arrayBox" placeholder="WIP - set hotkeys manually" disabled="true"></input> ]</p> <!-- '"Key1","Key2",etc.' -->
-                            <!-- <p><input type="radio" name="switchMethod" value="ASS" id="assButton"></input>ASS (Advanced Scene Switcher)</p>
-                            <p>Path to instance.txt (for ASS): <input type="text" name="assPath" id="assBox" placeholder="D:\Macro\data\instance.txt"></input></p> -->
-                        </div>
-                        <div>
                             <p>
-                                Lock indicators <input type="checkbox" name="locks" id="locks"></input>
-                                <input type="radio" name="lockPos" value="tl" disabled="true" checked="checked"></input>Top left
-                                <input type="radio" name="lockPos" value="tr" disabled="true"></input>Top right
-                                <input type="radio" name="lockPos" value="bl" disabled="true" onclick="warnWP()"></input>Bottom left
-                                <input type="radio" name="lockPos" value="br" disabled="true"></input>Bottom right
-                                <input type="radio" name="lockPos" value="c" disabled="true" onclick="warnWP()"></input>Center
-                            </p>
-                            <p>
-                                <input type="number" name="lockWidth" min="20" max="1000" placeholder="Width"></input>
-                                <input type="number" name="lockHeight" min="20" max="1000" placeholder="Height"></input>
-                            </p>
-                            <p>
-                                MultiMC path (for specnr macro locks): <input type="text" name="multiPath" placeholder="D:/Documents/MultiMC"></input>
-                            </p>
-                            <p>
-                                Instance name format (for specnr macro locks): <input type="text" name="instFormat" placeholder="Instance *"></input>
+                                <p><label><input type="radio" name="switchMethod" value="C" checked="checked"></input>OBS controller (default)</label></p>
+                                <p><label><input type="radio" name="switchMethod" value="N"></input>N (Numpad 1-9)</label></p>
+                                <p><label><input type="radio" name="switchMethod" value="F"></input>F (F13-F24)</label></p>
+                                <p><label><input type="radio" name="switchMethod" value="ARR" id="arrayButton"></input>ARR (advanced array)</label>
+                                [ <input type="text" name="switchArray" id="arrayBox" placeholder="WIP - set hotkeys manually" disabled="true"></input> ]</p> <!-- '"Key1","Key2",etc.' -->
                             </p>
                         </div>
                         <div>
+                            <p><label>Lock indicators<input id="lockCheck" onclick="toggleLockMembers()" type="checkbox" name="locks" id="locks"></input></label></p>
                             <p>
-                                Padding (gaps between wall instances): <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px
+                                <label class="lockOptions" style="display:none;"><input type="radio" name="lockPos" value="tl" checked="checked"></input>Top left</label>
+                                <label class="lockOptions" style="display:none;"><input type="radio" name="lockPos" value="tr"></input>Top right</label>
+                                <label class="lockOptions" style="display:none;"><input type="radio" name="lockPos" value="bl" onclick="warnWP()"></input>Bottom left</label>
+                                <label class="lockOptions" style="display:none;"><input type="radio" name="lockPos" value="br"></input>Bottom right</label>
+                                <label class="lockOptions" style="display:none;"><input type="radio" name="lockPos" value="c" onclick="warnWP()"></input>Center</label>
+                            </p>
+                            <p>
+                                <input class="lockOptions" style="display:none;" type="number" name="lockWidth" min="20" max="1000" placeholder="Width"></input>
+                                <input class="lockOptions" style="display:none;" type="number" name="lockHeight" min="20" max="1000" placeholder="Height"></input>
+                            </p>
+                            <p>
+                                <label class="lockOptions" style="display:none;">MultiMC path (for specnr macro locks) <input type="text" name="multiPath" placeholder="D:/Documents/MultiMC"></input></label>
+                            </p>
+                            <p>
+                                <label class="lockOptions" style="display:none;">Instance name format (for specnr macro locks) <input type="text" name="instFormat" placeholder="Instance *"></input></label>
                             </p>
                         </div>
-                        <div>
+                            <p>
+                                Padding (gaps between wall instances) <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px
+                            </p>
+                        <div style="background-color:rgb(22, 22, 22); padding: 5px; border-radius: 5px;">
                             <strong>Proof recording:</strong>
                             <p class="highlight">The generator cropping may not be accurate, depending on your setup.</p>
                             <p class="highlight">Ensure proof recording can clearly see the % of world loaded and chunkmap.</p>
                             <p>
-                                Include a separate proof recording scene (recommended) <input type="radio" name="proof" value="scene" checked="checked"></input>
+                                <label>Do not include any proof recording <input type="radio" name="proof" value="false" checked="checked" onclick="toggleProofMembers(false)"></input></label>
                             </p>
                             <p>
-                                Include other instances on scenes (similar to classic multi) <input type="radio" name="proof" value="corner"></input>
+                                <label>Include a separate proof recording scene (recommended) <input type="radio" name="proof" value="scene" onclick="toggleProofMembers()"></input></label>
+                            </p>
+                            <p>
+                                <label>Include other instances on scenes (similar to classic multi) <input type="radio" name="proof" value="corner" onclick="toggleProofMembers()"></input></label>
                             </p>
                             <!-- <p>
                                 Crop other instances to show only loading screen <input type="checkbox" name="loading" id="loading" disabled="true"></input>
                             </p> -->
                             <p>
-                                GUI Scale (for loading screen cropping) <input type="number" name="guiScale" min="1" max="4" placeholder="1-4"></input>
+                                <label style = "display:none;" class="proofOptions">GUI Scale (found in minecraft settings) <input type="number" name="guiScale" min="1" max="4" placeholder="1-4"></input></label>
                             </p>
                             <p>
-                                Width multiplier (for loading screen cropping) <input type="number" name="widthMultiplier" min="0" max="5" step="0.1" value="2.5"></input>
+                                <label style = "display:none;" class="proofOptions">Width multiplier (found in settings.ahk of macro) <input type="number" name="widthMultiplier" min="0" max="5" step="0.1" value="2.5"></input></label>
                             </p>
                             <p>
-                                Do you use borderless? <input type="checkbox" name="borderless"></input>
+                                <label style = "display:none;" class="proofOptions">Do you use borderless? <input type="checkbox" name="borderless"></input></label>
                             </p>
                         </div>
                     </div>
@@ -126,7 +125,7 @@
                 </div>
             </content>
             <div class="highlight" id="warning" style="display: none;">
-                Warning: Locks may cover loading screens. Ensure proof recording can see center and bottom left of instances
+                Warning: Locks may cover loading screens. Ensure proof recording can see % loaded and chunkmap
             </div>
         </main>
         <footer>
@@ -134,20 +133,35 @@
         </footer>
 
         <script>
-            document.getElementById("locks").onclick = function() {
-                lockChoices = document.getElementsByName("lockPos");
-                for (var i = 0; i < lockChoices.length; i++) {
-                    if (lockChoices[i].disabled) {
-                        lockChoices[i].disabled = false;
+            function toggleCustomMembers(on = true) {
+                var members = document.getElementsByClassName("customOptions");
+                for (var i = 0; i < members.length; i++) {
+                    members[i].disabled = !on;
+                }
+            }
+
+            function toggleLockMembers() {
+                var members = document.getElementsByClassName("lockOptions");
+                for (var i = 0; i < members.length; i++) {
+                    if (document.getElementById("lockCheck").checked) {
+                        members[i].style = "";
                     }
                     else {
-                        lockChoices[i].disabled = true;
+                        members[i].style = "display:none;";
                     }
                 }
             }
-            
-            document.getElementById("proof").onclick = function() {
-                document.getElementById("loading").disabled = document.getElementById("proof").checked == "checked";
+
+            function toggleProofMembers(on = true) {
+                var members = document.getElementsByClassName("proofOptions");
+                for (var i = 0; i < members.length; i++) {
+                    if (on) {
+                        members[i].style = "";
+                    }
+                    else {
+                        members[i].style = "display:none;";
+                    }
+                }
             }
 
             function warnWP() {
@@ -175,17 +189,6 @@
 
             // document.getElementById("rows").addEventListener("change", changePreview());
             // document.getElementById("cols").addEventListener("change", changePreview());
-
-            // arrayButton = document.getElementById("arrayButton");
-            // arrayButton.onclick = function() {
-            //     arrayBox = document.getElementById("arrayBox");
-            //     if (arrayButton.checked == "checked") {
-            //         arrayBox.disabled = false;
-            //     }
-            //     else {
-            //         arrayBox.disabled = true;
-            //     }
-            // }
         </script>
     </body>
 </html>
