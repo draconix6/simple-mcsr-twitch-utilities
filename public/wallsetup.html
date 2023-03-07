@@ -4,6 +4,7 @@
         <title>wall scene maker™</title>
         <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/> -->
         <link rel="stylesheet" href="./style.css"/>
+        <link rel="icon" type="image/x-icon" href="wallicon.png">
     </head>
     <body>
         <nav>
@@ -67,6 +68,9 @@
                                 [ <input type="text" name="switchArray" id="arrayBox" placeholder="WIP - set hotkeys manually" disabled="true"></input> ]</p> <!-- '"Key1","Key2",etc.' -->
                             </p>
                         </div>
+                        <p>
+                            Padding (gaps between wall instances) <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px
+                        </p>
                         <div>
                             <p><label>Lock indicators<input id="lockCheck" onclick="toggleLockMembers()" type="checkbox" name="locks" id="locks"></input></label></p>
                             <p>
@@ -87,9 +91,6 @@
                                 <label class="lockOptions" style="display:none;">Instance name format (for specnr macro locks) <input type="text" name="instFormat" placeholder="Instance *"></input></label>
                             </p>
                         </div>
-                            <p>
-                                Padding (gaps between wall instances) <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px
-                            </p>
                         <div style="background-color:rgb(22, 22, 22); padding: 5px; border-radius: 5px;">
                             <strong>Proof recording:</strong>
                             <p class="highlight">The generator cropping may not be accurate, depending on your setup.</p>
@@ -101,13 +102,13 @@
                                 <label>Include a separate proof recording scene (recommended) <input type="radio" name="proof" value="scene" onclick="toggleProofMembers()"></input></label>
                             </p>
                             <p>
-                                <label>Include other instances on scenes (similar to classic multi) <input type="radio" name="proof" value="corner" onclick="toggleProofMembers()"></input></label>
+                                <label>Include other instances on scenes (similar to classic multi) <input type="radio" name="proof" value="corner" onclick="toggleProofMembers(false)"></input></label>
                             </p>
                             <!-- <p>
                                 Crop other instances to show only loading screen <input type="checkbox" name="loading" id="loading" disabled="true"></input>
                             </p> -->
                             <p>
-                                <label style = "display:none;" class="proofOptions">GUI Scale (found in minecraft settings) <input type="number" name="guiScale" min="1" max="4" placeholder="1-4"></input></label>
+                                <label style = "display:none;" class="proofOptions">GUI Scale (found in minecraft settings) <input type="number" name="guiScale" min="1" max="20" step="1"></input></label>
                             </p>
                             <p>
                                 <label style = "display:none;" class="proofOptions">Width multiplier (found in settings.ahk of macro) <input type="number" name="widthMultiplier" min="0" max="5" step="0.1" value="2.5"></input></label>

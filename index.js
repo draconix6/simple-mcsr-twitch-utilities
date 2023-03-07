@@ -308,10 +308,10 @@ class WallSceneCollection extends Template
 
         settings.padding = Math.floor(settings.padding);
 
+        settings.guiScale = Math.floor(settings.guiScale);
         if (settings.guiScale == 0) {
             settings.guiScale = 4;
         }
-        settings.guiScale = Math.floor(settings.guiScale);
         settings.borderless = settings.borderless == "on";
 
         this.template.name = settings.cols + "x" + settings.rows + " wall";
