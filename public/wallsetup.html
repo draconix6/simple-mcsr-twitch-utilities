@@ -8,10 +8,10 @@
     </head>
     <body>
         <nav>
-            <!-- <a href="/">home</a>
+            <!-- <a href="/">home</a> -->
             <a href="wallsetup">wall scene maker</a>
-            <a href="raidsetup">raid command updater</a>
-            <a href="todaysetup">today command updater</a> -->
+            <!-- <a href="raidsetup">raid command updater</a> -->
+            <a href="todaysetup">today command updater</a>
         </nav>
         <main>
             <header>
@@ -36,12 +36,12 @@
                     </div>
                     <div>
                         <p>
-                            Use game capture (for fullscreen and EyeZoom macro users) <input type="checkbox" name="fullscreen" checked="checked"></input>
+                            <label>Use game capture (for fullscreen and EyeZoom macro users) <input type="checkbox" name="fullscreen" checked="checked"></input></label>
                         </p>
                     </div>
                     <div>
                         <p>
-                            Base resolution:
+                            Base resolution (OBS > Settings > Video):
                         </p>
                         <p>
                             <label><input onclick="toggleCustomMembers(false)" type="radio" name="screenSize" value="1080" checked="checked"></input>1920x1080</label>
@@ -61,10 +61,10 @@
                                 Scene switching method:
                             </p>
                             <p>
-                                <p><label><input type="radio" name="switchMethod" value="C" checked="checked"></input>OBS controller (default)</label></p>
-                                <p><label><input type="radio" name="switchMethod" value="N"></input>N (Numpad 1-9)</label></p>
-                                <p><label><input type="radio" name="switchMethod" value="F"></input>F (F13-F24)</label></p>
-                                <p><label><input type="radio" name="switchMethod" value="ARR" id="arrayButton"></input>ARR (advanced array)</label>
+                                <p><label><input type="radio" id="controller" name="switchMethod" value="C" checked="checked" onclick="changeLockOption(true)"></input>OBS controller (default)</label></p>
+                                <p><label><input type="radio" name="switchMethod" value="N" onclick="changeLockOption(false)"></input>N (Numpad 1-9)</label></p>
+                                <p><label><input type="radio" name="switchMethod" value="F" onclick="changeLockOption(false)"></input>F (F13-F24)</label></p>
+                                <p><label><input type="radio" name="switchMethod" value="ARR" id="arrayButton" onclick="changeLockOption(false)"></input>ARR (advanced array)</label>
                                 [ <input type="text" name="switchArray" id="arrayBox" placeholder="WIP - set hotkeys manually" disabled="true"></input> ]</p> <!-- '"Key1","Key2",etc.' -->
                             </p>
                         </div>
@@ -84,17 +84,19 @@
                                 <input class="lockOptions" style="display:none;" type="number" name="lockWidth" min="20" max="1000" placeholder="Width"></input>
                                 <input class="lockOptions" style="display:none;" type="number" name="lockHeight" min="20" max="1000" placeholder="Height"></input>
                             </p>
+                            <label class="lockOptions" id="singleLocks" style="display:none;">Lock image path <input type="text" name="lockPath" placeholder="C:/TheWall/media/lock.png"></input></label>
                             <p>
-                                <label class="lockOptions" style="display:none;">MultiMC path (for specnr macro locks) <input type="text" name="multiPath" placeholder="D:/Documents/MultiMC"></input></label>
+                                <label class="lockOptions multiLocks" style="display:none;">MultiMC path <input type="text" name="multiPath" placeholder="D:/Documents/MultiMC"></input></label>
                             </p>
                             <p>
-                                <label class="lockOptions" style="display:none;">Instance name format (for specnr macro locks) <input type="text" name="instFormat" placeholder="Instance *"></input></label>
+                                <label class="lockOptions multiLocks" style="display:none;">Instance name format <input type="text" name="instFormat" placeholder="Instance *"></input></label>
                             </p>
                         </div>
                         <div style="background-color:rgb(22, 22, 22); padding: 5px; border-radius: 5px;">
                             <strong>Proof recording:</strong>
-                            <p class="highlight">The generator cropping may not be accurate, depending on your setup.</p>
-                            <p class="highlight">Ensure proof recording can clearly see the % of world loaded and chunkmap.</p>
+                            <p class="highlight">The generator cropping may not be accurate.</p>
+                            <p class="highlight">Ensure proof recording can clearly see chunkmap and % loaded.</p>
+                            <p class="highlight">Cropping is optimized for WorldPreview 3.0.0+</p>
                             <p>
                                 <label>Do not include any proof recording <input type="radio" name="proof" value="false" checked="checked" onclick="toggleProofMembers(false)"></input></label>
                             </p>
@@ -102,21 +104,40 @@
                                 <label>Include a separate proof recording scene (recommended) <input type="radio" name="proof" value="scene" onclick="toggleProofMembers()"></input></label>
                             </p>
                             <p>
-                                <label>Include other instances on scenes (similar to classic multi) <input type="radio" name="proof" value="corner" onclick="toggleProofMembers(false)"></input></label>
+                                <label>Include other instances on scenes (similar to classic multi) <input type="radio" name="proof" value="corner" onclick="toggleProofMembers()"></input></label>
                             </p>
                             <!-- <p>
                                 Crop other instances to show only loading screen <input type="checkbox" name="loading" id="loading" disabled="true"></input>
                             </p> -->
                             <p>
-                                <label style = "display:none;" class="proofOptions">GUI Scale (found in minecraft settings) <input type="number" name="guiScale" min="1" max="20" step="1"></input></label>
+                                <label style="display:none;" class="proofOptions"><input onclick="switchProofMenu('default')" id="defaultProofSwitch" type="radio" name="proofProfile" value="default" checked="checked"></input>Default wall setup</label>
+                                <label style="display:none;" class="proofOptions"><input onclick="switchProofMenu('unstretched')" type="radio" name="proofProfile" value="small"></input>Unstretched windows <a href="https://www.youtube.com/watch?v=8DYIvJETTDE">(example)</a></label>
                             </p>
                             <p>
-                                <label style = "display:none;" class="proofOptions">Width multiplier (found in settings.ahk of macro) <input type="number" name="widthMultiplier" min="0" max="5" step="0.1" value="2.5"></input></label>
+                                <label style="display:none;" class="proofOptions proofDefault">Screen resolution: 
+                                    <input type="number" name="proofWidth" min="1280" max="10000" placeholder="Width"></input>
+                                    <input type="number" name="proofHeight" min="720" max="10000" placeholder="Height"></input>
+                                </label>
+                                <label style="display:none;" class="proofOptions proofUnstretched">Instance resolution: 
+                                    <input type="number" name="proofWidthUnstretched" min="100" max="10000" placeholder="Width"></input>
+                                    <input type="number" name="proofHeightUnstretched" min="100" max="10000" placeholder="Height"></input>
+                                </label>
+                            <p>
+                                <label style="display:none;" class="proofOptions proofDefault">Width multiplier (found in settings.ahk of macro) <input type="number" name="widthMultiplier" min="0" max="5" step="0.1" value="2.5"></input></label>
+                            </p>
+                            </p>
+                                <label style="display:none;" class="proofOptions">GUI Scale (found in minecraft settings) <input type="number" name="guiScale" min="1" max="20" step="1"></input></label>
                             </p>
                             <p>
-                                <label style = "display:none;" class="proofOptions">Do you use borderless? <input type="checkbox" name="borderless"></input></label>
+                                <label style="display:none;" class="proofOptions">Do you use borderless? <input type="checkbox" name="borderless"></input></label>
                             </p>
                         </div>
+                        <!-- <div>
+                            <p>
+                                <label>Experimental: Crop wall instances for visuals <a href="https://youtu.be/Q01hpTOD6hI">(example)</a> <input type="checkbox" name="cropToggle" id="cropToggle" onclick="toggleCropMembers()"></input></label>
+                                <p style="display:none;" class="highlight cropOptions">Please select "Include a separate proof recording scene" above and complete the required fields</p>
+                            </p>
+                        </div> -->
                     </div>
                     <p>
                         <input type="submit" value="Submit"></input>
@@ -151,12 +172,68 @@
                         members[i].style = "display:none;";
                     }
                 }
+                changeLockOption(document.getElementById("controller").checked);
+            }
+
+            function changeLockOption(singlePath) {
+                var members = document.getElementsByClassName("multiLocks");
+                var single = document.getElementById("singleLocks");
+                if (singlePath && document.getElementById("lockCheck").checked) {
+                    single.style = "";
+                    members[0].style = "display:none;";
+                    members[1].style = "display:none;";
+                }
+                else if (document.getElementById("lockCheck").checked) {
+                    single.style = "display:none;";
+                    members[0].style = "";
+                    members[1].style = "";
+                }
+                else {
+                    single.style = "display:none;";
+                    members[0].style = "display:none;";
+                    members[1].style = "display:none;";
+                }
             }
 
             function toggleProofMembers(on = true) {
                 var members = document.getElementsByClassName("proofOptions");
                 for (var i = 0; i < members.length; i++) {
                     if (on) {
+                        members[i].style = "";
+                        switchProofMenu("default");
+                    }
+                    else {
+                        members[i].style = "display:none;";
+                        document.getElementById("defaultProofSwitch").checked = true;
+                    }
+                }
+            }
+
+            function switchProofMenu(menu) {
+                var defaultOptions = document.getElementsByClassName("proofDefault");
+                var unstretchedOptions = document.getElementsByClassName("proofUnstretched");
+                if (menu == "default") {
+                    for (i = 0; i < defaultOptions.length; i++) {
+                        defaultOptions[i].style = "";
+                    }
+                    for (i = 0; i < unstretchedOptions.length; i++) {
+                        unstretchedOptions[i].style = "display: none";
+                    }
+                }
+                else {
+                    for (i = 0; i < defaultOptions.length; i++) {
+                        defaultOptions[i].style = "display: none";
+                    }
+                    for (i = 0; i < unstretchedOptions.length; i++) {
+                        unstretchedOptions[i].style = "";
+                    }
+                }
+            }
+
+            function toggleCropMembers() {
+                var members = document.getElementsByClassName("cropOptions");
+                for (var i = 0; i < members.length; i++) {
+                    if (document.getElementById("cropToggle").checked) {
                         members[i].style = "";
                     }
                     else {

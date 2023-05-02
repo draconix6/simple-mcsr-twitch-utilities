@@ -7,33 +7,56 @@
     </head>
     <body>
         <nav>
-            <a href="/">home</a>
+            <!-- <a href="/">home</a> -->
             <a href="wallsetup">wall scene maker</a>
-            <a href="raidsetup">raid command updater</a>
+            <!-- <a href="raidsetup">raid command updater</a> -->
             <a href="todaysetup">today command updater</a>
         </nav>
         <main>
             <header>
                 <h1>today command updater™</h1>
-                <h2 font-weight="bold">might have issues, use with caution</h2>
-                <p>After submit is clicked, the website will give you a URL.</p>
-                <p>Edit your !today command as shown</p>
+                <p>After entering your Twitch username & stats sheet, edit your !today command as provided</p>
             </header>
             <content>
-                <form action="/todayUrl" method="GET">
-                    <div>
-                        <p>
-                            Twitch username <input type="text" name="user" placeholder="draconix6" required="true"></input>
-                            Google Sheets link <input type="text" name="sheet" placeholder="https://docs.google.com/spreadsheets/d/..." required="true"></input>
-                            <!-- checkbox input for nightbot command here -->
-                        </p>
-                        <input type="submit" value="Submit"></input>
-                    </div>
+                <form>
+                    <p>
+                        Twitch username <input oninput="updateCommands()" type="text" id="user" placeholder="draconix6" required="true" value=""></input>
+                        Google Sheets link <input oninput="updateCommands()" type="text" id="sheet" placeholder="https://docs.google.com/spreadsheets/d/..." required="true" value=""></input>
+                        <!-- checkbox input for nightbot command here -->
+                    </p>
                 </form>
             </content>
+            <div id="commands"></div>
         </main>
         <footer>
-            made by draconix // <a href="https://github.com/draconix6/simple-mcsr-twitch-utilities">github</a>
+            <p>made by draconix & char // <a href="https://github.com/draconix6/simple-mcsr-twitch-utilities">github</a></p>
         </footer>
+        <script>
+            function updateCommands() {
+                var user = document.getElementById("user").value;
+                var sheet = document.getElementById("sheet").value.split("/d/")[1].split("/")[0];
+                var url = `https://today-command-updater.web.app/today?user=${user}&sheet=${sheet}`;
+                if (!sheet) {
+                    return;
+                }
+                document.getElementById("commands").innerHTML = `
+                <div class="commandExample">
+                    <p><strong>Nightbot</strong></p>
+                    <p class="command">!editcom !today $(urlfetch ${url})</p>
+                </div>
+                <div class="commandExample">
+                    <p><strong>StreamElements</strong></p>
+                    <p class="command">!commands edit !today $(urlfetch ${url})</p>
+                </div>
+                <div class="commandExample">
+                    <p><strong>Fossabot</strong></p>
+                    <p class="command">!editcmd !today $(customapi ${url})</p>
+                </div>
+                <div class="commandExample">
+                    <p>If you use a different chatbot, refer to the "variables" documentation of your chatbot to read from this URL:</p>
+                    <p class="command">${url}</p>
+                </div>`;
+            }
+        </script>
     </body>
 </html>

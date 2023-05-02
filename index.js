@@ -1,4 +1,5 @@
 const fs = require('fs');
+const axios = require('axios');
 const express = require('express');
 const app = express();
 
@@ -7,20 +8,6 @@ const app = express();
 class Template {
     constructor(templateSource) {
         this.template = JSON.parse(fs.readFileSync(templateSource));
-    }
-}
-
-class ASSSwitcher extends Template {
-    constructor(path, instNum) {
-        super("./templates/assFileSwitchTemplate.json");
-        this.template.file = path;
-        if (instNum == 0) {
-            this.template.target = "The Wall";
-        }
-        else {
-            this.template.target = "Instance " + instNum;
-        }
-        this.template.text = "" + instNum;
     }
 }
 
@@ -38,15 +25,20 @@ class CaptureSource extends Template {
 }
 
 class LockSource extends Template {
-    constructor(instNum, multiPath, instFormat) {
+    constructor(instNum, lockPath) {
         super("./templates/lockTemplate.json");
         this.template.name = "lock " + instNum;
-        if (multiPath && instFormat) {
-            this.template.settings.file = multiPath + "/instances/" + instFormat.replace("*", instNum) + "/.minecraft/lock.png";
+        if (lockPath) {
+            this.template.settings.file = lockPath;
         }
-        else {
-            this.template.settings.file = "";
-        }
+    }
+}
+
+class AudioSource extends Template {
+    constructor(instNum) {
+        super(`./templates/audioCaptureTemplate.json`);
+        this.template.name = "audio " + instNum;
+        this.template.settings.window = "Minecraft* - Instance " + instNum + ":GLFW30:javaw.exe";
     }
 }
 
@@ -58,10 +50,6 @@ class WSceneItem extends Template {
         if (proof) {
             this.template.bounds.x = settings.screenWidth / 6;
             this.template.bounds.y = settings.screenHeight / (2 * settings.instCount); // 2 here is the amount of screen the instances will take up
-            if (settings.loading) {
-                this.template.crop_right = settings.screenWidth / 2.25;
-                this.template.crop_top = settings.screenHeight / 2.5 / 2.5; // second 2.5 here is the normal width multiplier
-            }
             this.template.pos.x = settings.screenWidth - this.template.bounds.x;
             this.template.pos.y = settings.screenHeight - this.template.bounds.y * (instNum - yOffset);
         }
@@ -81,40 +69,39 @@ class WSceneItem extends Template {
 
 class PSceneItem extends Template {
     // crop: 0 = no crop, 1 = bottom-left, 2 = center
-    constructor(instNum, cols, width, height, windowWidth, windowHeight, guiScale, crop = 0, loadingSquareSize = 0, extraHeight = 0) {
+    constructor(instNum, x, y, width, height, windowWidth, windowHeight, crop = 0, loadingSquareSize = 0, extraHeight = 0) {
         super("./templates/wallSceneItemTemplate.json");
         this.template.name = "verification " + instNum;
         this.template.id = instNum;
 
-        let row = Math.floor((instNum - 1) / cols);
-        let col = Math.floor((instNum - 1) % cols);
-
-        switch (crop){
+        switch (crop) {
             case 0:
-                this.template.bounds.x = width - 2 * height;
+                this.template.bounds.x = width - height; // 2 * height for old WP
                 this.template.bounds.y = height;
-                this.template.pos.x = col * width;
-                this.template.pos.y = row * height;
+                this.template.pos.x = x;
+                this.template.pos.y = y;
                 break;
             case 1:
                 this.template.bounds.x = height;
                 this.template.bounds.y = height;
-                this.template.pos.x = col * width + (width - height);
-                this.template.pos.y = row * height;
+                this.template.pos.x = x + (width - height);
+                this.template.pos.y = y;
                 this.template.crop_top = windowHeight - extraHeight - loadingSquareSize;
                 this.template.crop_right = windowWidth - loadingSquareSize;
                 this.template.scale_filter = "point";
                 break;
-            case 2:
-                this.template.bounds.x = height;
-                this.template.bounds.y = height;
-                this.template.pos.x = col * width + (width - 2 * height);
-                this.template.pos.y = row * height;
-                this.template.crop_top = ((windowHeight - loadingSquareSize) / 2 + (guiScale * 30)) - extraHeight;
-                this.template.crop_bottom = (windowHeight - loadingSquareSize) / 2 - (guiScale * 30);
-                this.template.crop_left = (windowWidth - loadingSquareSize) / 2;
-                this.template.crop_right = (windowWidth - loadingSquareSize) / 2;
-                this.template.scale_filter = "point";
+        }
+    }
+}
+
+class ASceneItem extends Template {
+    constructor(instNum, groupItem) {
+        super("./templates/audioSceneItemTemplate.json");
+        this.template.name = "audio " + instNum;
+        this.template.id = instNum;
+        if (groupItem)
+        {
+            this.template.group_item_backup = true;
         }
     }
 }
@@ -133,7 +120,7 @@ class IScene extends Template {
             this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_NUM" + instNum;
             this.template.hotkeys["OBSBasic.SelectScene"][1].key = "OBS_KEY_NUM" + instNum;
         }
-        else if (settings.switchMethod == "ASS" || settings.switchMethod == "C") {
+        else if (settings.switchMethod == "C") {
             delete this.template.hotkeys["OBSBasic.SelectScene"];
         }
         this.template.name = "Instance " + instNum;
@@ -142,18 +129,28 @@ class IScene extends Template {
             this.template.settings.items[0].bounds.x = settings.screenWidth;
             this.template.settings.items[0].bounds.y = settings.screenHeight;
         // }
-        if (settings.proof == "corner") {
-            var yOffset = 0;
-            for (var i = 1; i <= settings.instCount; i++) {
-                if (i != instNum) {
-                    this.template.settings.items.splice(1, 0, new WSceneItem(settings, i, false, true, yOffset).template);
-                }
-                if (i == instNum) {
-                    yOffset = 1;
-                }
-            }
-            this.template.settings.items[1].id = settings.instCount + 1; // settings.instCount + 1
-        }
+        // if (settings.proof == "corner") {
+        //     var yOffset = 0;
+        //     for (var i = 1; i <= settings.instCount; i++) {
+        //         if (i != instNum) {
+        //             // this.template.settings.items.splice(1, 0, new WSceneItem(settings, i, false, true, yOffset).template);
+        //             // add instance scene proof
+        //             this.template.bounds.x = settings.screenWidth / 6;
+        //             this.template.bounds.y = settings.screenHeight / (2 * settings.instCount); // 2 here is the amount of screen the instances will take up
+        //             this.template.pos.x = settings.screenWidth - this.template.bounds.x;
+        //             this.template.pos.y = settings.screenHeight - this.template.bounds.y * (instNum - yOffset);
+                    
+        //             let row = Math.floor((instNum - 1) / proofCols);
+        //             let col = Math.floor((instNum - 1) % proofCols);
+        //             proofScene.template.settings.items.push(new PSceneItem(i, col * width, row * height, proofHeight, windowWidth, windowHeight, x).template);
+        //             proofScene.template.settings.items.push(new PSceneItem(i, col * width, row * height, proofWidth, proofHeight, windowWidth, windowHeight, x, 1, loadingSquareSize, extraHeight).template);
+        //         }
+        //         if (i == instNum) {
+        //             yOffset = 1;
+        //         }
+        //     }
+        //     // this.template.settings.items[1].id = settings.instCount + 1; // settings.instCount + 1
+        // }
     }
 }
 
@@ -183,6 +180,7 @@ class WSceneLock extends Template {
         if (groupItem)
         {
             this.template.group_item_backup = true;
+            this.template.locked = false;
         }
     }
 }
@@ -190,49 +188,29 @@ class WSceneLock extends Template {
 class GroupSource extends Template {
     constructor(settings, type) {
         super("./templates/groupTemplate.json");
-        if (type == "lock")
-        {
-            this.template.name = "lock group";
-        }
-        else if (type == "mc")
-        {
-            this.template.name = "mc group";
-        }
-        else if (type == "proof")
-        {
-            this.template.name = "proof";
-        }
+        this.template.name = type + " group";
         this.template.settings.cx = settings.screenWidth;
         this.template.settings.cy = settings.screenHeight;
     }
 }
 
 class WSceneGroup extends Template {
-    constructor(lock) {
+    constructor(type) {
         super("./templates/wallSceneItemTemplate.json");
-        if (lock)
-        {
-            this.template.name = "lock group";
-            this.template.id = 2;
-        }
-        else
-        {
-            this.template.name = "mc group";
-            this.template.id = 1;
-        }
+        this.template.name = type + " group";
         this.template.bounds.x = 0;
         this.template.bounds.y = 0;
         this.template.bounds_type = 0;
+        if (type == "audio") {
+            this.template.visible = false;
+        }
     }
 }
 
 class WScene extends Template {
     constructor(switchMethod) {
         super("./templates/wallSceneTemplate.json");
-        // if (switchMethod == "N" || switchMethod == "F") {
-        //     this.template.hotkeys["OBSBasic.SelectScene"][0].key = "OBS_KEY_F12";
-        // }
-        if (switchMethod == "ASS" || switchMethod == "C") {
+        if (switchMethod == "C") {
             delete this.template.hotkeys["OBSBasic.SelectScene"];
         }
     }
@@ -243,11 +221,10 @@ class WallSceneCollection extends Template
     constructor(settings) {
         super("./templates/collectionTemplate.json");
 
-        settings.rows = Math.floor(settings.rows);
-        settings.cols = Math.floor(settings.cols);
-        settings.instCount = settings.rows * settings.cols;
+        console.log(settings);
 
-        settings.fullscreen = settings.fullscreen == "on";
+        // create extra settings
+        settings.instCount = settings.rows * settings.cols;
 
         if (settings.screenSize == "1080") {
             settings.screenWidth = 1920;
@@ -262,65 +239,65 @@ class WallSceneCollection extends Template
             settings.screenHeight = 2160;
         }
         else if (settings.screenSize == "custom") {
-            settings.screenWidth = Math.floor(settings.screenWidth);
-            settings.screenHeight = Math.floor(settings.screenHeight);
             if (settings.screenWidth == 0) {
                 settings.screenWidth = settings.screenHeight * (16 / 9);
             }
             if (settings.screenHeight == 0) {
                 settings.screenHeight = settings.screenWidth / (16 / 9);
             }
-            if (settings.screenWidth + settings.screenHeight == 0) {
-                settings.screenWidth = 1920;
-                settings.screenHeight = 1080;
-            }
         }
-
-        if (!settings.assPath) {
-            settings.assPath = "";
-        }
-        settings.assPath = settings.assPath.replace(/\\/g,"/");
 
         settings.wallItemWidth = Math.floor(settings.screenWidth / settings.cols);
         settings.wallItemHeight = Math.floor(settings.screenHeight / settings.rows);
 
-        settings.locks = settings.locks == "on";
         if (settings.locks) {
-            if (settings.lockWidth == 0) {
-                settings.lockWidth = settings.lockHeight;
-            }
-            if (settings.lockHeight == 0) {
-                settings.lockHeight = settings.lockWidth;
-            }
-            if (settings.lockWidth + settings.lockHeight == 0) {
-                settings.lockWidth = settings.wallItemWidth / 7;
-                settings.lockHeight = settings.lockWidth;
-            }
-            settings.lockWidth = Math.floor(settings.lockWidth);
-            settings.lockHeight = Math.floor(settings.lockHeight);
-
-            settings.multiPath = settings.multiPath.replace(/\\/g,"/");
-            if (!settings.multiPath || !settings.instFormat) {
+            settings.lockPath = settings.lockPath.replace(/\\/g,"/");
+            if (settings.switchMethod == "C") {
                 settings.multiPath = "";
                 settings.instFormat = "";
             }
+            else {
+                settings.multiPath = settings.multiPath.replace(/\\/g,"/");
+                settings.lockPath = "";
+            }
+           
         }
 
-        settings.padding = Math.floor(settings.padding);
+        // create groups
+        // needs to be within scope of the code below
+        let mcGroup = new GroupSource(settings, "mc").template;
+        let lockGroup = new GroupSource(settings, "lock").template;
+        let audioGroup = new GroupSource(settings, "audio").template;
+        let mapGroup = new GroupSource(settings, "lock").template;
+        let percentGroup = new GroupSource(settings, "lock").template;
+        let pausedGroup = new GroupSource(settings, "lock").template;
+        // let proofGroup = new GroupSource("proof").template;
 
-        settings.guiScale = Math.floor(settings.guiScale);
-        if (settings.guiScale == 0) {
-            settings.guiScale = 4;
-        }
-        settings.borderless = settings.borderless == "on";
-
+        // init wall scene
         this.template.name = settings.cols + "x" + settings.rows + " wall";
         let wallScene = new WScene(settings.switchMethod);
-        if (settings.proof == "scene") {
+
+        // init proof numbers
+        let x = 1;
+        var windowWidth;
+        var windowHeight;
+        var proofWidth;
+        var proofHeight;
+        var proofRows;
+        var proofCols;
+        var loadingSquareSize;
+        var extraHeight;
+        if (settings.proof != "false") {
             var proofScene = new WScene(settings.switchMethod);
             proofScene.template.name = "Verification";
-            var windowWidth = settings.screenWidth;
-            var windowHeight = settings.screenHeight;
+            if (settings.proofProfile == "default") {
+                windowWidth = settings.proofWidth;
+                windowHeight = settings.proofHeight;
+            }
+            else {
+                windowWidth = settings.proofWidthUnstretched;
+                windowHeight = settings.proofHeightUnstretched;
+            }
 
             // new proof recording crops setup - credits to duncan
             if (settings.widthMultiplier != 0) {
@@ -346,83 +323,135 @@ class WallSceneCollection extends Template
             // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
             // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
             // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
+            // 🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆🦆
             // ---END OF STRUCTURAL INTEGRITY DUCKS---
 
-            var proofRows = Math.floor(Math.sqrt(settings.instCount)) - 1;
-            var proofCols = 0;
+            proofRows = Math.floor(Math.sqrt(settings.instCount)) - 1;
+            proofCols = 0;
             var sizeRatio = 0;
 
             do {
                 proofRows += 1;
                 proofCols = Math.ceil(settings.instCount / proofRows);
                 sizeRatio = Math.floor(settings.screenWidth / proofCols) / Math.floor(settings.screenHeight / proofRows);
-            } while (sizeRatio < 3.5 && proofCols != 1);
+            } while (proofCols != 1 && sizeRatio < 3.5);
+            console.log((proofRows * proofCols - settings.instCount) / (proofRows * proofCols));
+            while ((proofRows * proofCols - settings.instCount) / (proofRows * proofCols) > 0.2) {
+                proofRows += 1;
+            }
+            console.log(proofRows + " " + proofCols);
 
-            var proofWidth = Math.floor(settings.screenWidth / proofCols);
-            var proofHeight = Math.floor(settings.screenHeight / proofRows);
+            proofWidth = Math.floor(settings.screenWidth / proofCols);
+            proofHeight = Math.floor(settings.screenHeight / proofRows);
 
             // does not account for forceUnicodeFont option being true
             // in which case an odd number GUI scale must increment by 1
             // idk if it's too worth
-            let x = 1;
             while (x != settings.guiScale && x < windowWidth && x < windowHeight && windowWidth / (x + 1) >= 320 && windowHeight / (x + 1) >= 240) {
                 x++;
             }
 
-            var loadingSquareSize = x * 90;
-            var extraHeight = x * 19;
-
+            // square is 90x90
+            // extraHeight pertains to height needed to capture loading % above square - 19px
+            loadingSquareSize = x * 90;
+            extraHeight = x * 19;
+        }
+        if (settings.proof == "scene")
+        {
+            // add proof scene item
             for (var i = 1; i <= settings.instCount; i++) {
-                let proofSource = new CaptureSource(false, i);
-                proofSource.template.name = "verification " + i;
-                this.template.sources.push(proofSource.template);
-                proofScene.template.settings.items.push(new PSceneItem(i, proofCols, proofWidth, proofHeight, windowWidth, windowHeight, x).template);
-                proofScene.template.settings.items.push(new PSceneItem(i, proofCols, proofWidth, proofHeight, windowWidth, windowHeight, x, 1, loadingSquareSize, extraHeight).template);
-                proofScene.template.settings.items.push(new PSceneItem(i, proofCols, proofWidth, proofHeight, windowWidth, windowHeight, x, 2, loadingSquareSize, extraHeight).template);
+                let row = Math.floor((i - 1) / proofCols);
+                let col = Math.floor((i - 1) % proofCols);
+                proofScene.template.settings.items.push(new PSceneItem(i, col * proofWidth, row * proofHeight, proofWidth, proofHeight, windowWidth, windowHeight).template);
+                proofScene.template.settings.items.push(new PSceneItem(i, col * proofWidth, row * proofHeight, proofWidth, proofHeight, windowWidth, windowHeight, 1, loadingSquareSize, extraHeight).template);
             }
         }
 
-        // needs to be within scope of the code below
-        let mcGroup = new GroupSource(settings, "mc").template;
-        let lockGroup = new GroupSource(settings, "lock").template;
-        // let proofGroup = new GroupSource("proof").template;
-
+        // main loop
         for (var i = 1; i <= settings.instCount; i++) {
+            // add proof capture source
+            if (settings.proof != "false") {
+                let proofSource = new CaptureSource(false, i);
+                proofSource.template.name = "verification " + i;
+                this.template.sources.push(proofSource.template);
+            }
+
+            // add instance scene + game/window capture
             this.template.scene_order.push({name:"Instance " + (i)});
             this.template.sources.push(new CaptureSource(settings.fullscreen, i).template);
 
-            if (settings.switchMethod == "ASS") {
-                this.template.modules["advanced-scene-switcher"].fileSwitches.push(new ASSSwitcher(settings.assPath, i).template);
-            }
-
+            // add instance wall scene item
             wallScene.template.settings.items.push(new WSceneItem(settings, i, settings.locks).template);
             if (settings.locks) {
+                // add instance to group
                 mcGroup.settings.items.push(new WSceneItem(settings, i, false).template);
 
-                this.template.sources.push(new LockSource(i, settings.multiPath, settings.instFormat).template);
+                // add lock path
+                var lockPath = settings.switchMethod == "C" ? settings.lockPath :
+                settings.multiPath + "/instances/" + settings.instFormat.replace("*", i) + "/.minecraft/lock.png";
+                // add lock source, scene item & add to group
+                this.template.sources.push(new LockSource(i, lockPath).template);
                 lockGroup.settings.items.push(new WSceneLock(settings, i, false).template);
                 wallScene.template.settings.items.push(new WSceneLock(settings, i, true).template);
             }
 
-            this.template.sources.push(new IScene(settings, i).template);
-        }
-        if (settings.switchMethod == "ASS") {
-            this.template.modules["advanced-scene-switcher"].fileSwitches.push(new ASSSwitcher(settings.assPath, 0).template);
-            this.template.modules["advanced-scene-switcher"].readPath = settings.assPath;
-        }
-        else {
-            delete this.template.modules["advanced-scene-switcher"];
+            // add instance scene & proof recording sources if applicable
+            let iScene = new IScene(settings, i);
+            if (settings.proof == "corner") {
+                var yOffset = 0;
+                for (var j = 1; j <= settings.instCount; j++) {
+                    if (j != i) {
+                        // this.template.settings.items.splice(1, 0, new WSceneItem(settings, i, false, true, yOffset).template);
+                        // add instance scene proof
+                        let row = Math.floor((j - 1) / proofCols);
+                        let col = Math.floor((j - 1) % proofCols);
+                        var iProofMain = new PSceneItem(j, col * proofWidth, row * proofHeight, proofWidth, proofHeight, windowWidth, windowHeight);
+                        var iProofLoading = new PSceneItem(j, col * proofWidth, row * proofHeight, proofWidth, proofHeight, windowWidth, windowHeight, 1, loadingSquareSize, extraHeight);
+
+                        // adjust for corner
+                        iProofMain.template.bounds.x = settings.screenWidth / 7;
+                        iProofMain.template.bounds.y = settings.screenHeight / (1.5 * settings.instCount); // 1 here is the amount of screen the instances will take up (1/x)
+                        
+                        iProofLoading.template.bounds.x = iProofMain.template.bounds.y;
+                        iProofLoading.template.bounds.y = iProofMain.template.bounds.y;
+                        iProofLoading.template.pos.x = settings.screenWidth - iProofLoading.template.bounds.x;
+                        iProofLoading.template.pos.y = settings.screenHeight - iProofLoading.template.bounds.y * (j - yOffset);
+                        
+                        iProofMain.template.pos.x = settings.screenWidth - iProofMain.template.bounds.x - iProofLoading.template.bounds.x;
+                        iProofMain.template.pos.y = settings.screenHeight - iProofMain.template.bounds.y * (j - yOffset);
+                        
+                        iScene.template.settings.items.push(iProofMain.template);
+                        iScene.template.settings.items.push(iProofLoading.template);
+                    }
+                    if (j == i) {
+                        yOffset = 1;
+                    }
+                }
+            }
+            this.template.sources.push(iScene.template);
+
+            // add audio source
+            this.template.sources.push(new AudioSource(i).template);
+            this.template.sources[0].settings.items.push(new ASceneItem(i, true).template);
+            audioGroup.settings.items.push(new ASceneItem(i, false).template);
         }
 
-        if (settings.locks)
-        {
+        // add groups
+        if (settings.locks) {
             this.template.groups.push(mcGroup);
             this.template.groups.push(lockGroup);
 
-            wallScene.template.settings.items.push(new WSceneGroup(false).template);
-            wallScene.template.settings.items.push(new WSceneGroup(true).template);
+            wallScene.template.settings.items.push(new WSceneGroup("mc").template);
+            wallScene.template.settings.items.push(new WSceneGroup("lock").template);
+        }
+        this.template.groups.push(audioGroup);
+        this.template.sources[0].settings.items.push(new WSceneGroup("audio").template);
+
+        if (settings.cropToggle) {
+
         }
 
+        // push wall & proof scenes
         this.template.sources.push(wallScene.template);
         if (settings.proof == "scene") {
             this.template.sources.push(proofScene.template);
@@ -438,8 +467,9 @@ app.get("/wallDL", (req, res) => {
         <head>
             <link rel='stylesheet' href='./style.css'/>
         </head>
-        <body width='100%' height='100%' style='display:flex; justify-content:center; align-items:center;'>
-            Your download should have begun. If there are issues, please message draconix#6540
+        <body width='100%' height='100%' style='display:flex; flex-direction:column; justify-content:center; align-items:center;'>
+            <p>Your download should have begun. If there are issues, please message draconix#6540.</p>
+            <p>The downloaded file should be dragged into OBS > Scene Collection > Import.</p>
             <script type='text/javascript'>
                 function download(content, filename, contentType) {
                     if (!contentType) contentType = "application/octet-stream";
@@ -462,7 +492,3 @@ const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
     console.log("Server is running on port " + port);
 });
-
-// for (i = 0; i < ids.users.length; i++) {
-//     startHandlingEvents(ids.users[i]);
-// }

@@ -1,11 +1,11 @@
 {
     "align": 5,
     "bounds": {
-      "x": 640,
-      "y": 360
+      "x": 0,
+      "y": 0
     },
     "bounds_align": 0,
-    "bounds_type": 1,
+    "bounds_type": 0,
     "crop_bottom": 0,
     "crop_left": 0,
     "crop_right": 0,
@@ -14,9 +14,9 @@
     "hide_transition": {
       "duration": 0
     },
-    "id": 2,
-    "locked": true,
-    "name": "mc 1",
+    "id": 204,
+    "locked": false,
+    "name": "audio 1",
     "pos": {
       "x": 0,
       "y": 0

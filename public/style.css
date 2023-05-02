@@ -52,12 +52,19 @@ content {
 content > a {
     text-align: center;
 }
-form {
+form, .commandExample {
     background-color:rgb(44, 44, 44);
     border-radius:10px;
     padding:10px;
     margin-bottom: 10px;
     margin-right: 10px;
+}
+.commandExample {
+    background-color:rgb(11, 11, 11);
+    text-align:center;
+}
+p.command {
+    font-size:12px;
 }
 input[type=text] {
     margin: 5px;
