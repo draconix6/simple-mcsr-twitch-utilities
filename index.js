@@ -293,6 +293,13 @@ class WallSceneCollection extends Template
             if (settings.proofProfile == "default") {
                 windowWidth = settings.proofWidth;
                 windowHeight = settings.proofHeight;
+                if (settings.widthMultiplier != 0) {
+                    windowHeight = Math.floor(windowHeight / settings.widthMultiplier);
+                }
+                else if (!settings.borderless) {
+                    windowWidth += 16;
+                    windowHeight -= 24;
+                }
             }
             else {
                 windowWidth = settings.proofWidthUnstretched;
@@ -300,13 +307,6 @@ class WallSceneCollection extends Template
             }
 
             // new proof recording crops setup - credits to duncan
-            if (settings.widthMultiplier != 0) {
-                windowHeight = Math.floor(windowHeight / settings.widthMultiplier);
-            }
-            else if (!settings.borderless) {
-                windowWidth += 16;
-                windowHeight -= 24;
-            }
             if (!settings.borderless) {
                 // win10 border sizes
                 windowWidth -= 16;
