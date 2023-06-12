@@ -9,9 +9,9 @@
     <body>
         <nav>
             <!-- <a href="/">home</a> -->
-            <a href="wallsetup">wall scene maker</a>
+            <!-- <a href="wallsetup">wall scene maker</a> -->
             <!-- <a href="raidsetup">raid command updater</a> -->
-            <a href="todaysetup">today command updater</a>
+            <!-- <a href="todaysetup">today command updater</a> -->
         </nav>
         <main>
             <header>
@@ -69,7 +69,7 @@
                             </p>
                         </div>
                         <p>
-                            Padding (gaps between wall instances) <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px
+                            <label>Padding (gaps between wall instances) <input type="number" name="padding" id="padding" min="0" max="20" value="0" required="true"></input> px</label>
                         </p>
                         <div>
                             <p><label>Lock indicators<input id="lockCheck" onclick="toggleLockMembers()" type="checkbox" name="locks" id="locks"></input></label></p>
@@ -114,11 +114,11 @@
                                 <label style="display:none;" class="proofOptions"><input onclick="switchProofMenu('unstretched')" type="radio" name="proofProfile" value="small"></input>Unstretched windows <a href="https://www.youtube.com/watch?v=8DYIvJETTDE">(example)</a></label>
                             </p>
                             <p>
-                                <label style="display:none;" class="proofOptions proofDefault">Screen resolution: 
+                                <label style="display:none;" class="proofOptions proofDefault">Screen resolution 
                                     <input type="number" name="proofWidth" min="1280" max="10000" placeholder="Width"></input>
                                     <input type="number" name="proofHeight" min="720" max="10000" placeholder="Height"></input>
                                 </label>
-                                <label style="display:none;" class="proofOptions proofUnstretched">Instance resolution: 
+                                <label style="display:none;" class="proofOptions proofUnstretched">Instance resolution 
                                     <input type="number" name="proofWidthUnstretched" min="100" max="10000" placeholder="Width"></input>
                                     <input type="number" name="proofHeightUnstretched" min="100" max="10000" placeholder="Height"></input>
                                 </label>
@@ -204,6 +204,7 @@
                     }
                     else {
                         members[i].style = "display:none;";
+                        members[i].removeAttribute("required");
                         document.getElementById("defaultProofSwitch").checked = true;
                     }
                 }
@@ -215,17 +216,25 @@
                 if (menu == "default") {
                     for (i = 0; i < defaultOptions.length; i++) {
                         defaultOptions[i].style = "";
+                        if (defaultOptions[i].type != "checkbox") {
+                            defaultOptions[i].setAttribute("required", true);
+                        }
                     }
                     for (i = 0; i < unstretchedOptions.length; i++) {
                         unstretchedOptions[i].style = "display: none";
+                        unstretchedOptions[i].removeAttribute("required");
                     }
                 }
                 else {
                     for (i = 0; i < defaultOptions.length; i++) {
                         defaultOptions[i].style = "display: none";
+                        defaultOptions[i].removeAttribute("required");
                     }
                     for (i = 0; i < unstretchedOptions.length; i++) {
                         unstretchedOptions[i].style = "";
+                        if (unstretchedOptions[i].type != "checkbox") {
+                            unstretchedOptions[i].setAttribute("required", true);
+                        }
                     }
                 }
             }

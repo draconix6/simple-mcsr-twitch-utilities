@@ -159,8 +159,8 @@ class WSceneLock extends Template {
         super("./templates/wallSceneLockTemplate.json");
         this.template.name = "lock " + instNum;
         this.template.id = settings.instCount + instNum
-        this.template.bounds.x = settings.lockWidth
-        this.template.bounds.y = settings.lockHeight;
+        this.template.bounds.x = parseInt(settings.lockWidth);
+        this.template.bounds.y = parseInt(settings.lockHeight);
         this.template.pos.x = settings.wallItemWidth * ((instNum - 1) % settings.cols);
         this.template.pos.y = settings.wallItemHeight * Math.floor((instNum - 1) / settings.cols);
         if (settings.lockPos == "tr") {
@@ -260,7 +260,10 @@ class WallSceneCollection extends Template
                 settings.multiPath = settings.multiPath.replace(/\\/g,"/");
                 settings.lockPath = "";
             }
-           
+            if (settings.lockWidth == '' || settings.lockHeight == '') {
+                settings.lockWidth = 150;
+                settings.lockHeight = 150;
+            }
         }
 
         // create groups
@@ -281,8 +284,8 @@ class WallSceneCollection extends Template
         let x = 1;
         var windowWidth;
         var windowHeight;
-        var proofWidth;
-        var proofHeight;
+        var proofWidth = settings.screenWidth;
+        var proofHeight = settings.screenHeight;
         var proofRows;
         var proofCols;
         var loadingSquareSize;
@@ -335,10 +338,11 @@ class WallSceneCollection extends Template
                 proofCols = Math.ceil(settings.instCount / proofRows);
                 sizeRatio = Math.floor(settings.screenWidth / proofCols) / Math.floor(settings.screenHeight / proofRows);
             } while (proofCols != 1 && sizeRatio < 3.5);
-            console.log((proofRows * proofCols - settings.instCount) / (proofRows * proofCols));
-            while ((proofRows * proofCols - settings.instCount) / (proofRows * proofCols) > 0.2) {
-                proofRows += 1;
-            }
+            // console.log((proofRows * proofCols - settings.instCount) / (proofRows * proofCols));
+            // while ((proofRows * proofCols - settings.instCount) / (proofRows * proofCols) > 0.2) {
+            //     console.log("wa4");
+            //     proofRows += 1;
+            // }
             console.log(proofRows + " " + proofCols);
 
             proofWidth = Math.floor(settings.screenWidth / proofCols);
